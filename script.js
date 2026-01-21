@@ -214,6 +214,7 @@ class BookingSystem {
         
         // Toggle change event
         toggle.addEventListener('change', (e) => {
+            console.log('Toggle changed to:', e.target.checked ? 'Available' : 'All');
             this.showAvailableOnly = e.target.checked;
             updateLabels();
             this.renderBookings();
@@ -221,6 +222,7 @@ class BookingSystem {
         
         // Make labels clickable
         allLabel.addEventListener('click', () => {
+            console.log('All label clicked');
             toggle.checked = false;
             this.showAvailableOnly = false;
             updateLabels();
@@ -228,6 +230,7 @@ class BookingSystem {
         });
         
         availableLabel.addEventListener('click', () => {
+            console.log('Available label clicked');
             toggle.checked = true;
             this.showAvailableOnly = true;
             updateLabels();
@@ -364,15 +367,22 @@ class BookingSystem {
     renderBookings() {
         const container = document.getElementById('bookingsList');
         
+        console.log('renderBookings called, showAvailableOnly:', this.showAvailableOnly);
+        console.log('Total bookings:', this.bookings.length);
+        
         // Filter bookings based on toggle state
         let bookingsToRender = this.bookings;
         
         if (this.showAvailableOnly) {
             bookingsToRender = this.bookings.filter(booking => {
                 const playersNeeded = this.calculatePlayersNeeded(booking);
-                return playersNeeded > 0;
+                const isAvailable = playersNeeded > 0;
+                console.log(`Booking ${booking.id}: players needed=${playersNeeded}, available=${isAvailable}`);
+                return isAvailable;
             });
         }
+        
+        console.log('Bookings to render:', bookingsToRender.length);
         
         // Sort bookings by date and time (Unix timestamps for accuracy)
         bookingsToRender.sort((a, b) => {
@@ -482,7 +492,7 @@ class BookingSystem {
 
         return `
             <div class="booking-card">
-                <div class="booking-date-number">${dayNumber}</div>
+                <div class="booking-date-number ${playersNeeded === 0 ? 'full' : ''}">${dayNumber}</div>
                 <div class="booking-content">
                     <div class="booking-header">
                         <div class="booking-left">
