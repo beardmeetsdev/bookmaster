@@ -40,10 +40,22 @@ header {
     flex-wrap: wrap;
 }
 
+.toggle-section {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 2rem;
+    padding-left: 0;
+}
+
 .toggle-container {
     display: flex;
     align-items: center;
     gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .toggle-label {
