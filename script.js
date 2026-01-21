@@ -30,6 +30,7 @@ class BookingSystem {
         try {
             const snapshot = await db.collection('bookings').get();
             this.bookings = snapshot.docs.map(doc => doc.data());
+            this.sortBookings();
             this.renderBookings();
         } catch (error) {
             console.error('Error loading bookings from Firebase:', error);
@@ -175,6 +176,7 @@ class BookingSystem {
         
         // Always use user's bookings for the live site
         this.bookings = userBookings;
+        this.sortBookings();
         this.saveBookingsToFirebase();
         console.log('User bookings loaded');
     }
@@ -597,6 +599,7 @@ class BookingSystem {
         }
         
         await this.saveBookingsToFirebase();
+        this.sortBookings();
         this.renderBookings();
         this.closeModal();
     }
@@ -612,8 +615,17 @@ class BookingSystem {
         if (confirm('Are you sure you want to delete this booking?')) {
             this.bookings = this.bookings.filter(b => b.id !== id);
             await this.saveBookingsToFirebase();
+            this.sortBookings();
             this.renderBookings();
         }
+    }
+
+    sortBookings() {
+        this.bookings.sort((a, b) => {
+            const dateCompare = a.date.localeCompare(b.date);
+            if (dateCompare !== 0) return dateCompare;
+            return a.startTime.localeCompare(b.startTime);
+        });
     }
 
     async downloadForWhatsApp() {
