@@ -120,6 +120,21 @@ header h1 {
     flex-wrap: wrap;
 }
 
+.toggle-section {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 2rem;
+    padding-left: 0;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1.5rem 0;
+    gap: 1.5rem;
+}
+
 .btn {
     padding: 12px 24px;
     border: none;
