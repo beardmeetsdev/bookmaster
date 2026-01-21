@@ -35,9 +35,9 @@ header {
 }
 
 .toggle-label {
-    font-size: 0.85rem;
+    font-size: 1.06rem;
     font-weight: 600;
-    color: #555;
+    color: #888;
     text-shadow: none;
     transition: all 0.3s ease;
 }
@@ -50,8 +50,8 @@ header {
 .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 40px;
-    height: 24px;
+    width: 50px;
+    height: 30px;
 }
 
 .toggle-switch input {
@@ -77,10 +77,10 @@ header {
 .slider:before {
     position: absolute;
     content: "";
-    height: 16px;
-    width: 16px;
-    left: 4px;
-    bottom: 4px;
+    height: 20px;
+    width: 20px;
+    left: 5px;
+    bottom: 5px;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 50%;
@@ -94,7 +94,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(16px);
+    transform: translateX(20px);
     background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
     box-shadow: 0 2px 6px rgba(39,174,96,0.4);
 }
