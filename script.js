@@ -2,15 +2,69 @@ class BookingSystem {
     constructor() {
         this.bookings = [];
         this.currentEditingId = null;
-        this.init();
-    }
-
-    init() {
+        
+        // Add sample bookings for demo purposes
+        this.addSampleBookings();
+        
         this.loadBookings();
         this.setupEventListeners();
         this.populateTimeDropdowns();
         this.cleanupPastBookings();
         this.renderBookings();
+    }
+
+    addSampleBookings() {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        
+        const sampleBookings = [
+            {
+                id: this.generateId(),
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: 'Court 2',
+                date: tomorrow.toISOString().split('T')[0],
+                startTime: '15:00',
+                sessionLength: '60',
+                endTime: '16:00',
+                bookedBy: 'Matt',
+                players: ['Matt Crawford', 'John Smith']
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Tennis',
+                maxPlayers: 4,
+                court: 'Court 1',
+                date: nextWeek.toISOString().split('T')[0],
+                startTime: '10:00',
+                sessionLength: '90',
+                endTime: '11:30',
+                bookedBy: 'Sarah',
+                players: ['Sarah Wilson', 'Tom Brown', 'Mike Lee', 'Lisa Chen']
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Badminton',
+                maxPlayers: 2,
+                court: 'Court 3',
+                date: tomorrow.toISOString().split('T')[0],
+                startTime: '18:00',
+                sessionLength: '60',
+                endTime: '19:00',
+                bookedBy: 'Alex',
+                players: ['Alex Johnson']
+            }
+        ];
+        
+        // Only add sample bookings if localStorage is empty
+        if (this.bookings.length === 0) {
+            this.bookings = sampleBookings;
+            this.saveBookings();
+        }
     }
 
     setupEventListeners() {
