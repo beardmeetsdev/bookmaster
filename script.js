@@ -472,7 +472,7 @@ class BookingSystem {
         // Players needed display
         const playersNeededDisplay = playersNeeded > 0 
             ? `<span class="players-needed">${playersNeeded} PLAYERS STILL NEEDED</span>`
-            : '';
+            : '<span class="session-full">THIS SESSION IS FULL</span>';
 
         return `
             <div class="booking-card">

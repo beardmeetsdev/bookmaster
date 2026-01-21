@@ -326,6 +326,18 @@ header h1 {
     flex-shrink: 0;
 }
 
+.session-full {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #27ae60;
+    background-color: #f0f9f4;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #a9dfbf;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 .player-button {
     display: inline-block;
     padding: 4px 10px;
