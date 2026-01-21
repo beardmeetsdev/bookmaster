@@ -241,6 +241,7 @@ class BookingSystem {
 
         // Download for WhatsApp (single button)
         document.getElementById('downloadWhatsApp').addEventListener('click', () => {
+            console.log('WhatsApp download button clicked');
             this.downloadForWhatsApp();
         });
 
@@ -655,6 +656,7 @@ class BookingSystem {
     }
 
     async downloadForWhatsApp() {
+        console.log('downloadForWhatsApp method started');
         try {
             // Filter bookings based on toggle state
             let bookingsToDownload = this.bookings;
