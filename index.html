@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Racquet Court Booking System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Racquet Court Bookings</h1>
+            <div class="header-actions">
+                <button id="downloadWhatsAppAll" class="btn btn-secondary">
+                    📱 Download WhatsApp ALL
+                </button>
+                <button id="downloadWhatsAppAvailable" class="btn btn-secondary">
+                    📱 Download WhatsApp AVAILABLE
+                </button>
+                <button id="createNew" class="btn btn-primary">
+                    ➕ Create New Event
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div id="bookingsList" class="bookings-container">
+                <!-- Bookings will be dynamically inserted here -->
+            </div>
+            
+            <div id="noBookings" class="no-bookings" style="display: none;">
+                <p>No upcoming bookings found.</p>
+                <p>Click "Create New Event" to add your first booking.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Create New Booking</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="courtType">Court Type:</label>
+                    <select id="courtType" required>
+                        <option value="">Select court type</option>
+                        <option value="Padel">Padel</option>
+                        <option value="Tennis">Tennis</option>
+                        <option value="Badminton">Badminton</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxPlayers">Number of Players:</label>
+                    <select id="maxPlayers" required>
+                        <option value="2">2 Players</option>
+                        <option value="4" selected>4 Players</option>
+                        <option value="infinite">Unlimited</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="court">Court:</label>
+                    <select id="court">
+                        <option value="">Select a court</option>
+                        <option value="Court 1">Court 1</option>
+                        <option value="Court 2">Court 2</option>
+                        <option value="Court 3">Court 3</option>
+                        <option value="Court 4">Court 4</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="startTime">Start Time:</label>
+                    <select id="startTime" required>
+                        <option value="">Select start time</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sessionLength">Session Length:</label>
+                    <select id="sessionLength" required>
+                        <option value="60">60 minutes</option>
+                        <option value="90">90 minutes</option>
+                        <option value="120">120 minutes</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bookedBy">Booked By:</label>
+                    <input type="text" id="bookedBy" placeholder="Enter name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="players">Players (one per line):</label>
+                    <textarea id="players" rows="4" placeholder="Player 1&#10;Player 2&#10;Player 3&#10;Player 4"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
