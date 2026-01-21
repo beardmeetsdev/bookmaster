@@ -655,6 +655,15 @@ class BookingSystem {
         }
     }
 
+    formatTime(time) {
+        const [hours, minutes] = time.split(':');
+        const hour = parseInt(hours);
+        const minute = minutes;
+        const ampm = hour >= 12 ? 'pm' : 'am';
+        const displayHour = hour % 12 || 12; // Convert 0 to 12
+        return `${displayHour}:${minute} ${ampm}`;
+    }
+
     async downloadForWhatsApp() {
         console.log('downloadForWhatsApp method started');
         try {
