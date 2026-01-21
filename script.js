@@ -192,8 +192,43 @@ class BookingSystem {
 
     setupEventListeners() {
         // Toggle switch for All/Available
-        document.getElementById('bookingToggle').addEventListener('change', (e) => {
+        const toggle = document.getElementById('bookingToggle');
+        const allLabel = document.querySelector('.toggle-label:first-child');
+        const availableLabel = document.querySelector('.toggle-label:last-child');
+        
+        // Update labels based on toggle state
+        const updateLabels = () => {
+            if (toggle.checked) {
+                allLabel.classList.remove('active');
+                availableLabel.classList.add('active');
+            } else {
+                allLabel.classList.add('active');
+                availableLabel.classList.remove('active');
+            }
+        };
+        
+        // Initialize labels
+        updateLabels();
+        
+        // Toggle change event
+        toggle.addEventListener('change', (e) => {
             this.showAvailableOnly = e.target.checked;
+            updateLabels();
+            this.renderBookings();
+        });
+        
+        // Make labels clickable
+        allLabel.addEventListener('click', () => {
+            toggle.checked = false;
+            this.showAvailableOnly = false;
+            updateLabels();
+            this.renderBookings();
+        });
+        
+        availableLabel.addEventListener('click', () => {
+            toggle.checked = true;
+            this.showAvailableOnly = true;
+            updateLabels();
             this.renderBookings();
         });
 
