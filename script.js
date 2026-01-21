@@ -15,6 +15,7 @@ class BookingSystem {
     constructor() {
         this.bookings = [];
         this.currentEditingId = null;
+        this.showAvailableOnly = false;
         
         // Load bookings from Firebase instead of localStorage
         this.loadBookingsFromFirebase();
@@ -190,19 +191,20 @@ class BookingSystem {
     }
 
     setupEventListeners() {
+        // Toggle switch for All/Available
+        document.getElementById('bookingToggle').addEventListener('change', (e) => {
+            this.showAvailableOnly = e.target.checked;
+            this.renderBookings();
+        });
+
         // Create new booking
         document.getElementById('createNew').addEventListener('click', () => {
             this.openModal();
         });
 
-        // Download for WhatsApp - ALL
-        document.getElementById('downloadWhatsAppAll').addEventListener('click', () => {
-            this.downloadForWhatsApp('all');
-        });
-
-        // Download for WhatsApp - AVAILABLE
-        document.getElementById('downloadWhatsAppAvailable').addEventListener('click', () => {
-            this.downloadForWhatsApp('available');
+        // Download for WhatsApp (single button)
+        document.getElementById('downloadWhatsApp').addEventListener('click', () => {
+            this.downloadForWhatsApp();
         });
 
         // Modal controls
@@ -324,24 +326,36 @@ class BookingSystem {
 
     renderBookings() {
         const container = document.getElementById('bookingsList');
-        const noBookings = document.getElementById('noBookings');
+        
+        // Filter bookings based on toggle state
+        let bookingsToRender = this.bookings;
+        
+        if (this.showAvailableOnly) {
+            bookingsToRender = this.bookings.filter(booking => {
+                const playersNeeded = this.calculatePlayersNeeded(booking);
+                return playersNeeded > 0;
+            });
+        }
         
         // Sort bookings by date and time
-        const sortedBookings = [...this.bookings].sort((a, b) => {
+        bookingsToRender.sort((a, b) => {
             const dateCompare = a.date.localeCompare(b.date);
             if (dateCompare !== 0) return dateCompare;
             return a.startTime.localeCompare(b.startTime);
         });
 
-        if (sortedBookings.length === 0) {
-            container.innerHTML = '';
-            noBookings.style.display = 'block';
+        if (bookingsToRender.length === 0) {
+            container.innerHTML = `
+                <div class="no-bookings">
+                    <h3>${this.showAvailableOnly ? 'No available slots' : 'No bookings found'}</h3>
+                    <p>${this.showAvailableOnly ? 'All bookings are full!' : 'Create your first booking to get started.'}</p>
+                </div>
+            `;
             return;
         }
 
-        noBookings.style.display = 'none';
-        container.innerHTML = sortedBookings.map(booking => this.createBookingCard(booking)).join('');
-
+        container.innerHTML = bookingsToRender.map(booking => this.createBookingCard(booking)).join('');
+        
         // Add event listeners to the new buttons
         container.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -567,145 +581,85 @@ class BookingSystem {
         }
     }
 
-    async downloadForWhatsApp(type = 'all') {
+    async downloadForWhatsApp() {
         try {
+            // Filter bookings based on toggle state
+            let bookingsToDownload = this.bookings;
+            
+            if (this.showAvailableOnly) {
+                bookingsToDownload = this.bookings.filter(booking => {
+                    const playersNeeded = this.calculatePlayersNeeded(booking);
+                    return playersNeeded > 0;
+                });
+            }
+            
             // Sort bookings for display
-            const sortedBookings = [...this.bookings].sort((a, b) => {
+            const sortedBookings = bookingsToDownload.sort((a, b) => {
                 const dateCompare = a.date.localeCompare(b.date);
                 if (dateCompare !== 0) return dateCompare;
                 return a.startTime.localeCompare(b.startTime);
             });
 
-            // Filter bookings based on type
-            let filteredBookings = sortedBookings;
-            if (type === 'available') {
-                filteredBookings = sortedBookings.filter(booking => {
-                    // Calculate players needed for this booking
-                    const calculatePlayersNeeded = (booking) => {
-                        if (!booking.players || booking.players.length === 0) {
-                            return booking.maxPlayers === 'infinite' ? 0 : parseInt(booking.maxPlayers);
-                        }
-                        
-                        if (booking.maxPlayers === 'infinite') {
-                            return 0; // Unlimited players, never need more
-                        }
-                        
-                        const maxCount = parseInt(booking.maxPlayers);
-                        const currentCount = booking.players.length;
-                        const needed = maxCount - currentCount;
-                        return needed > 0 ? needed : 0;
-                    };
-                    
-                    const playersNeeded = calculatePlayersNeeded(booking);
-                    return playersNeeded > 0; // Only include bookings that need players
-                });
+            if (sortedBookings.length === 0) {
+                alert(this.showAvailableOnly ? 'No available slots to download!' : 'No bookings to download!');
+                return;
             }
 
-            let textContent = '🏸 RACQUET COURT BOOKINGS\n\n';
+            let textContent = `🏸 RACQUET COURT BOOKINGS - ${this.showAvailableOnly ? 'AVAILABLE SLOTS' : 'ALL BOOKINGS'}\n\n`;
             
-            if (type === 'available') {
-                textContent = '🏸 RACQUET COURT BOOKINGS - AVAILABLE SLOTS\n\n';
-            }
-
-            if (filteredBookings.length === 0) {
-                if (type === 'available') {
-                    textContent += 'No bookings with available slots found.';
-                } else {
-                    textContent += 'No upcoming bookings found.';
-                }
+            const totalSpaces = sortedBookings.reduce((sum, booking) => sum + booking.maxPlayers, 0);
+            const totalPlayers = sortedBookings.reduce((sum, booking) => sum + (booking.players ? booking.players.length : 0), 0);
+            const availableSpaces = totalSpaces - totalPlayers;
+            
+            if (this.showAvailableOnly) {
+                textContent += `${availableSpaces} SPACES available\n\n`;
             } else {
-                filteredBookings.forEach((booking, index) => {
-                    const dateObj = new Date(booking.date);
-                    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                    const dayNumber = dateObj.getDate();
-                    const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
-                    
-                    // Get ordinal suffix
-                    const getOrdinalSuffix = (day) => {
-                        if (day > 3 && day < 21) return 'th';
-                        switch (day % 10) {
-                            case 1: return 'st';
-                            case 2: return 'nd';
-                            case 3: return 'rd';
-                            default: return 'th';
-                        }
-                    };
-                    
-                    // Format time to 24-hour format with 'h' notation
-                    const formatTimeForDisplay = (time) => {
-                        const [hours, minutes] = time.split(':');
-                        return `${parseInt(hours).toString().padStart(2, '0')}h`;
-                    };
-                    
-                    // Format player names as first name + surname initial
-                    const formatPlayerName = (fullName) => {
-                        const parts = fullName.trim().split(' ');
-                        if (parts.length === 1) {
-                            return parts[0]; // Just first name if no surname
-                        }
-                        const firstName = parts[0];
-                        const surnameInitial = parts[parts.length - 1][0];
-                        return `${firstName} ${surnameInitial}`;
-                    };
-                    
-                    const startTimeFormatted = formatTimeForDisplay(booking.startTime);
-                    const endTimeFormatted = formatTimeForDisplay(booking.endTime);
-                    
-                    // Main booking line with asterisks for bold formatting
-                    textContent += `*${dayName} ${dayNumber}${getOrdinalSuffix(dayNumber)} ${monthName} - ${booking.courtType}*\n`;
-                    textContent += `⏰ ${startTimeFormatted} - ${endTimeFormatted}\n`;
-                    
-                    // Handle court and booked by with Unknown placeholders
-                    const courtDisplay = (booking.court && booking.court !== '' && booking.court !== '*') 
-                        ? booking.court 
-                        : 'Court Unknown';
-                    const bookedByDisplay = (booking.bookedBy && booking.bookedBy !== '' && booking.bookedBy !== '*') 
-                        ? booking.bookedBy 
-                        : 'Booker Unknown';
-                    textContent += `🏟️ ${courtDisplay} • Booked by ${bookedByDisplay}\n`;
-                    
-                    // Players (formatted as first name + initial)
-                    if (booking.players && booking.players.length > 0) {
-                        const formattedPlayers = booking.players.map(player => formatPlayerName(player));
-                        textContent += `👥 ${formattedPlayers.join(' • ')}\n`;
-                    } else {
-                        textContent += `👥 No players\n`;
-                    }
-                    
-                    // Calculate and add players needed
-                    const calculatePlayersNeeded = (booking) => {
-                        if (!booking.players || booking.players.length === 0) {
-                            return booking.maxPlayers === 'infinite' ? 0 : parseInt(booking.maxPlayers);
-                        }
-                        
-                        if (booking.maxPlayers === 'infinite') {
-                            return 0; // Unlimited players, never need more
-                        }
-                        
-                        const maxCount = parseInt(booking.maxPlayers);
-                        const currentCount = booking.players.length;
-                        const needed = maxCount - currentCount;
-                        return needed > 0 ? needed : 0;
-                    };
-                    
-                    const playersNeeded = calculatePlayersNeeded(booking);
-                    if (playersNeeded > 0) {
-                        textContent += `*${playersNeeded} PLAYERS STILL NEEDED*\n`;
-                    }
-                    
-                    // Add separator between bookings (2 blank lines)
-                    if (index < filteredBookings.length - 1) {
-                        textContent += '\n\n';
-                    }
-                });
+                textContent += `${totalSpaces} TOTAL SPACES\n${availableSpaces} SPACES available\n\n`;
             }
-            
-            // Create downloadable text file
+
+            for (let i = 0; i < sortedBookings.length; i++) {
+                const booking = sortedBookings[i];
+                const dateObj = new Date(booking.date);
+                const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                const dayNumber = dateObj.getDate();
+                const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
+                
+                const timeDisplay = `${dayName} ${dayNumber}${this.getOrdinalSuffix(dayNumber)} ${monthName}`;
+                const timeRange = `${this.formatTime(booking.startTime)} - ${this.formatTime(booking.endTime)}`;
+                
+                // Handle court and booked by with "Unknown" placeholders
+                const courtDisplay = booking.court || 'Unknown';
+                const bookedByDisplay = booking.bookedBy || 'Unknown';
+                
+                textContent += `*${timeDisplay} - ${booking.courtType}*\n`;
+                textContent += `⏰ ${timeRange}\n`;
+                textContent += `🏟️ ${courtDisplay} • Booked by ${bookedByDisplay}\n`;
+                
+                // Players display
+                if (booking.players && booking.players.length > 0) {
+                    textContent += `👥 ${booking.players.join(' • ')}\n`;
+                } else {
+                    textContent += `👥 No players\n`;
+                }
+                
+                // Players needed
+                const playersNeeded = this.calculatePlayersNeeded(booking);
+                if (playersNeeded > 0) {
+                    textContent += `*${playersNeeded} PLAYERS STILL NEEDED*\n`;
+                }
+                
+                // Add separator between bookings (except last one)
+                if (i < sortedBookings.length - 1) {
+                    textContent += '\n';
+                }
+            }
+
+            // Create and download the file
             const blob = new Blob([textContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `racquet-bookings-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = `racquet-bookings-${this.showAvailableOnly ? 'available' : 'all'}-${new Date().toISOString().split('T')[0]}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
