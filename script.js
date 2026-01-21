@@ -374,11 +374,11 @@ class BookingSystem {
             });
         }
         
-        // Sort bookings by date and time (chronological)
+        // Sort bookings by date and time (Unix timestamps for accuracy)
         bookingsToRender.sort((a, b) => {
-            const dateA = new Date(a.date + ' ' + a.startTime);
-            const dateB = new Date(b.date + ' ' + b.startTime);
-            return dateA - dateB;
+            const timestampA = new Date(a.date + ' ' + a.startTime).getTime();
+            const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
+            return timestampA - timestampB;
         });
 
         if (bookingsToRender.length === 0) {
@@ -622,10 +622,10 @@ class BookingSystem {
 
     sortBookings() {
         this.bookings.sort((a, b) => {
-            // Compare dates chronologically
-            const dateA = new Date(a.date + ' ' + a.startTime);
-            const dateB = new Date(b.date + ' ' + b.startTime);
-            return dateA - dateB;
+            // Convert to Unix timestamps for accurate chronological sorting
+            const timestampA = new Date(a.date + ' ' + a.startTime).getTime();
+            const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
+            return timestampA - timestampB;
         });
     }
 
@@ -641,11 +641,11 @@ class BookingSystem {
                 });
             }
             
-            // Sort bookings for display (chronological)
+            // Sort bookings for display (Unix timestamps for accuracy)
             const sortedBookings = bookingsToDownload.sort((a, b) => {
-                const dateA = new Date(a.date + ' ' + a.startTime);
-                const dateB = new Date(b.date + ' ' + b.startTime);
-                return dateA - dateB;
+                const timestampA = new Date(a.date + ' ' + a.startTime).getTime();
+                const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
+                return timestampA - timestampB;
             });
 
             if (sortedBookings.length === 0) {
