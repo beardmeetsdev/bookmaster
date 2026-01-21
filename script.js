@@ -629,6 +629,21 @@ class BookingSystem {
         });
     }
 
+    calculatePlayersNeeded(booking) {
+        if (!booking.players || booking.players.length === 0) {
+            return booking.maxPlayers === 'infinite' ? 0 : parseInt(booking.maxPlayers);
+        }
+        
+        if (booking.maxPlayers === 'infinite') {
+            return 0; // Unlimited players, never need more
+        }
+        
+        const maxCount = parseInt(booking.maxPlayers);
+        const currentCount = booking.players.length;
+        const needed = maxCount - currentCount;
+        return needed > 0 ? needed : 0;
+    }
+
     async downloadForWhatsApp() {
         try {
             // Filter bookings based on toggle state
