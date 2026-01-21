@@ -459,23 +459,7 @@ class BookingSystem {
             timeSubtitle += ` booked by ${booking.bookedBy}`;
         }
         
-        // Calculate players still needed
-        const calculatePlayersNeeded = (booking) => {
-            if (!booking.players || booking.players.length === 0) {
-                return booking.maxPlayers === 'infinite' ? 0 : parseInt(booking.maxPlayers);
-            }
-            
-            if (booking.maxPlayers === 'infinite') {
-                return 0; // Unlimited players, never need more
-            }
-            
-            const maxCount = parseInt(booking.maxPlayers);
-            const currentCount = booking.players.length;
-            const needed = maxCount - currentCount;
-            return needed > 0 ? needed : 0;
-        };
-        
-        const playersNeeded = calculatePlayersNeeded(booking);
+        const playersNeeded = this.calculatePlayersNeeded(booking);
         
         // Players on single line with button-style and colors
         const playersText = booking.players && booking.players.length > 0
@@ -637,6 +621,21 @@ class BookingSystem {
             const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
             return timestampA - timestampB;
         });
+    }
+
+    calculatePlayersNeeded(booking) {
+        if (!booking.players || booking.players.length === 0) {
+            return booking.maxPlayers === 'infinite' ? 0 : parseInt(booking.maxPlayers);
+        }
+        
+        if (booking.maxPlayers === 'infinite') {
+            return 0; // Unlimited players, never need more
+        }
+        
+        const maxCount = parseInt(booking.maxPlayers);
+        const currentCount = booking.players.length;
+        const needed = maxCount - currentCount;
+        return needed > 0 ? needed : 0;
     }
 
     async downloadForWhatsApp() {
