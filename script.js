@@ -48,9 +48,9 @@ class BookingSystem {
                 batch.delete(doc.ref);
             });
             
-            // Add all current bookings
+            // Add all current bookings with their existing IDs
             this.bookings.forEach(booking => {
-                const docRef = db.collection('bookings').doc();
+                const docRef = db.collection('bookings').doc(booking.id);
                 batch.set(docRef, booking);
             });
             
@@ -214,7 +214,6 @@ class BookingSystem {
         
         // Toggle change event
         toggle.addEventListener('change', (e) => {
-            console.log('Toggle changed to:', e.target.checked ? 'Available' : 'All');
             this.showAvailableOnly = e.target.checked;
             updateLabels();
             this.renderBookings();
@@ -222,7 +221,6 @@ class BookingSystem {
         
         // Make labels clickable
         allLabel.addEventListener('click', () => {
-            console.log('All label clicked');
             toggle.checked = false;
             this.showAvailableOnly = false;
             updateLabels();
@@ -230,7 +228,6 @@ class BookingSystem {
         });
         
         availableLabel.addEventListener('click', () => {
-            console.log('Available label clicked');
             toggle.checked = true;
             this.showAvailableOnly = true;
             updateLabels();
@@ -367,22 +364,15 @@ class BookingSystem {
     renderBookings() {
         const container = document.getElementById('bookingsList');
         
-        console.log('renderBookings called, showAvailableOnly:', this.showAvailableOnly);
-        console.log('Total bookings:', this.bookings.length);
-        
         // Filter bookings based on toggle state
         let bookingsToRender = this.bookings;
         
         if (this.showAvailableOnly) {
             bookingsToRender = this.bookings.filter(booking => {
                 const playersNeeded = this.calculatePlayersNeeded(booking);
-                const isAvailable = playersNeeded > 0;
-                console.log(`Booking ${booking.id}: players needed=${playersNeeded}, available=${isAvailable}`);
-                return isAvailable;
+                return playersNeeded > 0;
             });
         }
-        
-        console.log('Bookings to render:', bookingsToRender.length);
         
         // Sort bookings by date and time (Unix timestamps for accuracy)
         bookingsToRender.sort((a, b) => {
@@ -459,7 +449,23 @@ class BookingSystem {
             timeSubtitle += ` booked by ${booking.bookedBy}`;
         }
         
-        const playersNeeded = this.calculatePlayersNeeded(booking);
+        // Calculate players still needed
+        const calculatePlayersNeeded = (booking) => {
+            if (!booking.players || booking.players.length === 0) {
+                return booking.maxPlayers === 'infinite' ? 0 : parseInt(booking.maxPlayers);
+            }
+            
+            if (booking.maxPlayers === 'infinite') {
+                return 0; // Unlimited players, never need more
+            }
+            
+            const maxCount = parseInt(booking.maxPlayers);
+            const currentCount = booking.players.length;
+            const needed = maxCount - currentCount;
+            return needed > 0 ? needed : 0;
+        };
+        
+        const playersNeeded = calculatePlayersNeeded(booking);
         
         // Players on single line with button-style and colors
         const playersText = booking.players && booking.players.length > 0
@@ -472,11 +478,11 @@ class BookingSystem {
         // Players needed display
         const playersNeededDisplay = playersNeeded > 0 
             ? `<span class="players-needed">${playersNeeded} PLAYERS STILL NEEDED</span>`
-            : '<span class="session-full">THIS SESSION IS FULL</span>';
+            : '';
 
         return `
             <div class="booking-card">
-                <div class="booking-date-number ${playersNeeded === 0 ? 'full' : ''}">${dayNumber}</div>
+                <div class="booking-date-number">${dayNumber}</div>
                 <div class="booking-content">
                     <div class="booking-header">
                         <div class="booking-left">
@@ -621,21 +627,6 @@ class BookingSystem {
             const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
             return timestampA - timestampB;
         });
-    }
-
-    calculatePlayersNeeded(booking) {
-        if (!booking.players || booking.players.length === 0) {
-            return booking.maxPlayers === 'infinite' ? 0 : parseInt(booking.maxPlayers);
-        }
-        
-        if (booking.maxPlayers === 'infinite') {
-            return 0; // Unlimited players, never need more
-        }
-        
-        const maxCount = parseInt(booking.maxPlayers);
-        const currentCount = booking.players.length;
-        const needed = maxCount - currentCount;
-        return needed > 0 ? needed : 0;
     }
 
     async downloadForWhatsApp() {
