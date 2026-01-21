@@ -14,57 +14,122 @@ class BookingSystem {
     }
 
     addSampleBookings() {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        const nextWeek = new Date(today);
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        
-        const sampleBookings = [
+        // User's actual bookings data
+        const userBookings = [
             {
                 id: this.generateId(),
                 courtType: 'Padel',
                 maxPlayers: 4,
-                court: 'Court 2',
-                date: tomorrow.toISOString().split('T')[0],
+                court: '',
+                date: '2025-01-23',
+                startTime: '15:00',
+                sessionLength: '60',
+                endTime: '16:00',
+                bookedBy: 'Claire',
+                players: []
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: '',
+                date: '2025-01-27',
+                startTime: '09:00',
+                sessionLength: '120',
+                endTime: '11:00',
+                bookedBy: 'Richard',
+                players: []
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: '',
+                date: '2025-01-27',
+                startTime: '13:00',
+                sessionLength: '60',
+                endTime: '14:00',
+                bookedBy: 'Claire',
+                players: []
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: '',
+                date: '2025-01-27',
                 startTime: '15:00',
                 sessionLength: '60',
                 endTime: '16:00',
                 bookedBy: 'Matt',
-                players: ['Matt Crawford', 'John Smith']
+                players: ['Matt C', 'Roy']
             },
             {
                 id: this.generateId(),
-                courtType: 'Tennis',
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: '',
+                date: '2025-01-27',
+                startTime: '15:00',
+                sessionLength: '60',
+                endTime: '16:00',
+                bookedBy: 'Jonny',
+                players: []
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Padel',
                 maxPlayers: 4,
                 court: 'Court 1',
-                date: nextWeek.toISOString().split('T')[0],
-                startTime: '10:00',
-                sessionLength: '90',
-                endTime: '11:30',
-                bookedBy: 'Sarah',
-                players: ['Sarah Wilson', 'Tom Brown', 'Mike Lee', 'Lisa Chen']
+                date: '2025-01-29',
+                startTime: '15:00',
+                sessionLength: '60',
+                endTime: '16:00',
+                bookedBy: 'Matt',
+                players: []
             },
             {
                 id: this.generateId(),
-                courtType: 'Badminton',
-                maxPlayers: 2,
-                court: 'Court 3',
-                date: tomorrow.toISOString().split('T')[0],
-                startTime: '18:00',
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: 'Court 1',
+                date: '2025-01-29',
+                startTime: '21:00',
                 sessionLength: '60',
-                endTime: '19:00',
-                bookedBy: 'Alex',
-                players: ['Alex Johnson']
+                endTime: '22:00',
+                bookedBy: 'Claire',
+                players: []
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: 'Court 1',
+                date: '2025-01-30',
+                startTime: '15:00',
+                sessionLength: '60',
+                endTime: '16:00',
+                bookedBy: 'Claire',
+                players: []
+            },
+            {
+                id: this.generateId(),
+                courtType: 'Padel',
+                maxPlayers: 4,
+                court: 'Court 1',
+                date: '2025-01-30',
+                startTime: '20:00',
+                sessionLength: '60',
+                endTime: '21:00',
+                bookedBy: 'Matt',
+                players: []
             }
         ];
         
-        // Only add sample bookings if localStorage is empty
-        if (this.bookings.length === 0) {
-            this.bookings = sampleBookings;
-            this.saveBookings();
-        }
+        // Always use user's bookings for the live site
+        this.bookings = userBookings;
+        this.saveBookings();
+        console.log('User bookings loaded');
     }
 
     setupEventListeners() {
