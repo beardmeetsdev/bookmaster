@@ -1,16 +1,62 @@
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDklNMETqvQctyioT5PQWbqD1Q0pHdYXo4",
+  authDomain: "bookmaster-booking.firebaseapp.com",
+  projectId: "bookmaster-booking",
+  storageBucket: "bookmaster-booking.firebasestorage.app",
+  messagingSenderId: "887763262438",
+  appId: "1:887763262438:web:8108ec31e10b9dc8b81427"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 class BookingSystem {
     constructor() {
         this.bookings = [];
         this.currentEditingId = null;
         
-        // Add sample bookings for demo purposes
-        this.addSampleBookings();
+        // Load bookings from Firebase instead of localStorage
+        this.loadBookingsFromFirebase();
         
-        this.loadBookings();
         this.setupEventListeners();
         this.populateTimeDropdowns();
         this.cleanupPastBookings();
         this.renderBookings();
+    }
+
+    async loadBookingsFromFirebase() {
+        try {
+            const snapshot = await db.collection('bookings').get();
+            this.bookings = snapshot.docs.map(doc => doc.data());
+            this.renderBookings();
+        } catch (error) {
+            console.error('Error loading bookings from Firebase:', error);
+            // Fallback to hardcoded bookings if Firebase fails
+            this.addSampleBookings();
+        }
+    }
+
+    async saveBookingsToFirebase() {
+        try {
+            // Clear existing bookings
+            const snapshot = await db.collection('bookings').get();
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            
+            // Add all current bookings
+            this.bookings.forEach(booking => {
+                const docRef = db.collection('bookings').doc();
+                batch.set(docRef, booking);
+            });
+            
+            await batch.commit();
+            console.log('Bookings saved to Firebase');
+        } catch (error) {
+            console.error('Error saving bookings to Firebase:', error);
+        }
     }
 
     addSampleBookings() {
@@ -128,8 +174,19 @@ class BookingSystem {
         
         // Always use user's bookings for the live site
         this.bookings = userBookings;
-        this.saveBookings();
+        this.saveBookingsToFirebase();
         console.log('User bookings loaded');
+    }
+
+    loadBookings() {
+        // This method is now replaced by loadBookingsFromFirebase
+        // Kept for compatibility
+    }
+
+    saveBookings() {
+        // This method is now replaced by saveBookingsToFirebase
+        // Kept for compatibility
+        this.saveBookingsToFirebase();
     }
 
     setupEventListeners() {
@@ -158,9 +215,9 @@ class BookingSystem {
         });
 
         // Form submission
-        document.getElementById('bookingForm').addEventListener('submit', (e) => {
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            this.saveBooking();
+            await this.saveBooking();
         });
 
         // Close modal when clicking outside
@@ -206,10 +263,6 @@ class BookingSystem {
             ];
             this.saveBookings();
         }
-    }
-
-    saveBookings() {
-        localStorage.setItem('racquetBookings', JSON.stringify(this.bookings));
     }
 
     generateId() {
@@ -298,9 +351,9 @@ class BookingSystem {
         });
 
         container.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 const id = e.target.dataset.id;
-                this.deleteBooking(id);
+                await this.deleteBooking(id);
             });
         });
     }
@@ -442,7 +495,7 @@ class BookingSystem {
         this.currentEditingId = null;
     }
 
-    saveBooking() {
+    async saveBooking() {
         const courtType = document.getElementById('courtType').value;
         const maxPlayers = document.getElementById('maxPlayers').value;
         const court = document.getElementById('court').value || '';
@@ -494,7 +547,7 @@ class BookingSystem {
             this.bookings.push(newBooking);
         }
         
-        this.saveBookings();
+        await this.saveBookingsToFirebase();
         this.renderBookings();
         this.closeModal();
     }
@@ -506,10 +559,10 @@ class BookingSystem {
         }
     }
 
-    deleteBooking(id) {
+    async deleteBooking(id) {
         if (confirm('Are you sure you want to delete this booking?')) {
             this.bookings = this.bookings.filter(b => b.id !== id);
-            this.saveBookings();
+            await this.saveBookingsToFirebase();
             this.renderBookings();
         }
     }
