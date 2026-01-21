@@ -374,11 +374,11 @@ class BookingSystem {
             });
         }
         
-        // Sort bookings by date and time
+        // Sort bookings by date and time (chronological)
         bookingsToRender.sort((a, b) => {
-            const dateCompare = a.date.localeCompare(b.date);
-            if (dateCompare !== 0) return dateCompare;
-            return a.startTime.localeCompare(b.startTime);
+            const dateA = new Date(a.date + ' ' + a.startTime);
+            const dateB = new Date(b.date + ' ' + b.startTime);
+            return dateA - dateB;
         });
 
         if (bookingsToRender.length === 0) {
@@ -622,9 +622,10 @@ class BookingSystem {
 
     sortBookings() {
         this.bookings.sort((a, b) => {
-            const dateCompare = a.date.localeCompare(b.date);
-            if (dateCompare !== 0) return dateCompare;
-            return a.startTime.localeCompare(b.startTime);
+            // Compare dates chronologically
+            const dateA = new Date(a.date + ' ' + a.startTime);
+            const dateB = new Date(b.date + ' ' + b.startTime);
+            return dateA - dateB;
         });
     }
 
@@ -640,11 +641,11 @@ class BookingSystem {
                 });
             }
             
-            // Sort bookings for display
+            // Sort bookings for display (chronological)
             const sortedBookings = bookingsToDownload.sort((a, b) => {
-                const dateCompare = a.date.localeCompare(b.date);
-                if (dateCompare !== 0) return dateCompare;
-                return a.startTime.localeCompare(b.startTime);
+                const dateA = new Date(a.date + ' ' + a.startTime);
+                const dateB = new Date(b.date + ' ' + b.startTime);
+                return dateA - dateB;
             });
 
             if (sortedBookings.length === 0) {
