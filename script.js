@@ -522,7 +522,10 @@ class BookingSystem {
 
         return `
             <div class="booking-card">
-                <div class="booking-date-number ${playersNeeded === 0 ? 'full' : ''}">${dayNumber}</div>
+                <div class="booking-date-number ${playersNeeded === 0 ? 'full' : ''}">
+                    <div class="date-day">${dayNumber}</div>
+                    <div class="date-month">${monthName}</div>
+                </div>
                 <div class="booking-content">
                     <div class="booking-header">
                         <div class="booking-left">

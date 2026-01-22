@@ -316,12 +316,29 @@ header {
     font-size: 1.4rem;
     font-weight: 700;
     width: 54px;
-    height: 54px;
+    height: 60px;
     border-radius: 8px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    padding: 6px 4px;
+    text-align: center;
+}
+
+.date-day {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.date-month {
+    font-size: 0.6rem;
+    font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+    margin-top: 2px;
 }
 
 .booking-date-number.full {
@@ -789,10 +806,19 @@ header {
     }
     
     .booking-date-number {
-        font-size: 1.2rem;
-        min-width: 35px;
-        height: 35px;
-        line-height: 35px;
+        width: 35px;
+        height: 40px;
+        padding: 4px 2px;
+    }
+    
+    .date-day {
+        font-size: 1rem;
+        line-height: 1;
+    }
+    
+    .date-month {
+        font-size: 0.5rem;
+        margin-top: 1px;
     }
     
     .booking-content {
@@ -884,10 +910,19 @@ header {
     }
     
     .booking-date-number {
-        font-size: 1rem;
-        min-width: 30px;
-        height: 30px;
-        line-height: 30px;
+        width: 30px;
+        height: 35px;
+        padding: 3px 2px;
+    }
+    
+    .date-day {
+        font-size: 0.9rem;
+        line-height: 1;
+    }
+    
+    .date-month {
+        font-size: 0.45rem;
+        margin-top: 1px;
     }
     
     .booking-header h3 {
