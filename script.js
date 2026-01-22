@@ -443,6 +443,18 @@ class BookingSystem {
         const startTimeFormatted = formatTimeForDisplay(booking.startTime);
         const endTimeFormatted = formatTimeForDisplay(booking.endTime);
         
+        // Calculate duration in minutes
+        const calculateDuration = (startTime, endTime) => {
+            const start = new Date(`2000-01-01 ${startTime}`);
+            const end = new Date(`2000-01-01 ${endTime}`);
+            const diffMs = end - start;
+            const diffMins = Math.round(diffMs / 60000);
+            return diffMins;
+        };
+        
+        const duration = calculateDuration(booking.startTime, booking.endTime);
+        const durationText = `${duration} mins`;
+        
         // Get ordinal suffix for day
         const getOrdinalSuffix = (day) => {
             if (day > 3 && day < 21) return 'th';
@@ -454,8 +466,8 @@ class BookingSystem {
             }
         };
         
-        // Main title: Time range with day in parentheses
-        const title = `${startTimeFormatted} - ${endTimeFormatted} (${dayName})`;
+        // Main title: Day and time with duration in parentheses
+        const title = `${dayName} ${startTimeFormatted} (${durationText})`;
         
         // Time subtitle with conditional court and booked by info
         let timeSubtitle = booking.courtType;
