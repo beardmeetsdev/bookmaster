@@ -691,8 +691,10 @@ class BookingSystem {
 
             let textContent = `🏸 RACQUET COURT BOOKINGS - ${this.showAvailableOnly ? 'AVAILABLE SLOTS' : 'ALL BOOKINGS'}\n\n`;
             
-            const totalSpaces = sortedBookings.reduce((sum, booking) => sum + booking.maxPlayers, 0);
-            const totalPlayers = sortedBookings.reduce((sum, booking) => sum + (booking.players ? booking.players.length : 0), 0);
+            // Calculate spaces properly, excluding 'infinite' bookings
+            const validBookings = sortedBookings.filter(booking => booking.maxPlayers !== 'infinite');
+            const totalSpaces = validBookings.reduce((sum, booking) => sum + parseInt(booking.maxPlayers), 0);
+            const totalPlayers = validBookings.reduce((sum, booking) => sum + (booking.players ? booking.players.length : 0), 0);
             const availableSpaces = totalSpaces - totalPlayers;
             
             if (this.showAvailableOnly) {
