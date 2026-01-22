@@ -483,7 +483,7 @@ class BookingSystem {
 
         return `
             <div class="booking-card">
-                <div class="booking-date-number">${dayNumber}</div>
+                <div class="booking-date-number ${playersNeeded === 0 ? 'full' : ''}">${dayNumber}</div>
                 <div class="booking-content">
                     <div class="booking-header">
                         <div class="booking-left">

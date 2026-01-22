@@ -213,6 +213,10 @@ header h1 {
     flex-shrink: 0;
 }
 
+.booking-date-number.full {
+    background-color: #27ae60;
+}
+
 .booking-content {
     flex: 1;
     display: flex;
