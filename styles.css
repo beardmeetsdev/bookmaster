@@ -190,7 +190,7 @@ input:checked + .slider:hover {
 .download-link {
     color: #666;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 500;
     transition: color 0.3s ease;
 }
@@ -219,7 +219,7 @@ input:checked + .slider:hover {
 .header-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 10px;
+    padding: 10px 10px 5px 10px;
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -722,7 +722,7 @@ input:checked + .slider:hover {
         justify-content: space-between;
         align-items: center;
         gap: 0.5rem;
-        margin: 0.3rem 0;
+        margin: 0.1rem 0;
     }
     
     .radio-toggle-container {
