@@ -23,7 +23,15 @@ body {
 header {
     background: transparent;
     padding: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.header-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #ddd, transparent);
+    margin: 0.2rem auto 0.2rem auto;
+    max-width: 1200px;
+    padding: 0 10px;
 }
 
 .toggle-container {
@@ -177,7 +185,7 @@ input:checked + .slider:hover {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 0.5rem 0;
+    margin: 0.2rem 0;
     gap: 1rem;
 }
 
