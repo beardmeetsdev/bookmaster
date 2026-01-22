@@ -216,10 +216,28 @@ input:checked + .slider:hover {
     gap: 2rem;
 }
 
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.logo h1 {
+    font-size: 2rem;
+    margin: 0;
+    text-align: left;
+    color: #000;
+    font-weight: 700;
+}
+
 .court-filter-container {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 10px;
 }
 
 .court-select {
