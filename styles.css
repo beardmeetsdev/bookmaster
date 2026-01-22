@@ -818,22 +818,6 @@ input:checked + .slider:hover {
         font-size: 16px;
     }
     
-    /* Toggle section */
-    .toggle-section {
-        flex-direction: column;
-        gap: 1rem;
-        margin: 1rem 0;
-    }
-    
-    .radio-toggle-container {
-        justify-content: center;
-        gap: 1.5rem;
-    }
-    
-    .court-filter-container {
-        justify-content: center;
-    }
-    
     /* Booking cards */
     .booking-card {
         padding: 12px;
