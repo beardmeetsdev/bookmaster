@@ -193,47 +193,17 @@ class BookingSystem {
     }
 
     setupEventListeners() {
-        // Toggle switch for All/Available
-        const toggle = document.getElementById('bookingToggle');
-        const allLabel = document.querySelector('.toggle-label:first-child');
-        const availableLabel = document.querySelector('.toggle-label:last-child');
+        // Radio button toggle events
+        const radioButtons = document.querySelectorAll('input[name="bookingFilter"]');
         
-        // Update labels based on toggle state
-        const updateLabels = () => {
-            if (toggle.checked) {
-                allLabel.classList.remove('active');
-                availableLabel.classList.add('active');
-            } else {
-                allLabel.classList.add('active');
-                availableLabel.classList.remove('active');
-            }
-        };
-        
-        // Initialize labels
-        updateLabels();
-        
-        // Toggle change event
-        toggle.addEventListener('change', (e) => {
-            this.showAvailableOnly = e.target.checked;
-            updateLabels();
-            this.renderBookings();
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                console.log('Radio button changed to:', e.target.value);
+                this.showAvailableOnly = e.target.value === 'available';
+                this.renderBookings();
+            });
         });
         
-        // Make labels clickable
-        allLabel.addEventListener('click', () => {
-            toggle.checked = false;
-            this.showAvailableOnly = false;
-            updateLabels();
-            this.renderBookings();
-        });
-        
-        availableLabel.addEventListener('click', () => {
-            toggle.checked = true;
-            this.showAvailableOnly = true;
-            updateLabels();
-            this.renderBookings();
-        });
-
         // Create new booking
         document.getElementById('createNew').addEventListener('click', () => {
             this.openModal();

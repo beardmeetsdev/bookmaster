@@ -107,6 +107,77 @@ input:checked + .slider:hover {
     box-shadow: 0 0 20px rgba(39,174,96,0.4), inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Radio Button Toggle Styles */
+.radio-toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2rem;
+    margin: 1.5rem 0;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.radio-dot {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #888;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.radio-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #27ae60;
+    transition: all 0.3s ease;
+}
+
+.radio-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    transition: all 0.3s ease;
+}
+
+.radio-option input[type="radio"]:checked + .radio-dot {
+    border-color: #27ae60;
+}
+
+.radio-option input[type="radio"]:checked + .radio-dot::after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.radio-option input[type="radio"]:checked ~ .radio-label {
+    color: #27ae60;
+}
+
+.radio-option:hover .radio-dot {
+    border-color: #27ae60;
+    box-shadow: 0 0 8px rgba(39,174,96,0.3);
+}
+
 header h1 {
     font-size: 2.5rem;
     margin-bottom: 20px;
