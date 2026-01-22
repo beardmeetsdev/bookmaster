@@ -235,6 +235,11 @@ header {
     gap: 1.5rem;
 }
 
+/* Hide mobile dropdown on desktop */
+.court-dropdown-mobile {
+    display: none;
+}
+
 .btn {
     padding: 12px 24px;
     border: none;
@@ -644,6 +649,156 @@ header {
     }
 }
 
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    /* Container adjustments */
+    .container {
+        padding: 10px;
+        max-width: 100%;
+    }
+    
+    /* Header adjustments */
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .logo h1 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+    
+    .header-actions {
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        gap: 6px;
+    }
+    
+    .btn-icon {
+        font-size: 16px;
+    }
+    
+    /* Toggle section */
+    .toggle-section {
+        flex-direction: column;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .radio-toggle-container {
+        justify-content: center;
+        gap: 1.5rem;
+    }
+    
+    .court-filter-container {
+        justify-content: center;
+    }
+    
+    /* Hide desktop radio buttons on mobile */
+    .court-radio-desktop {
+        display: none;
+    }
+    
+    /* Show mobile dropdown */
+    .court-dropdown-mobile {
+        display: block;
+    }
+    
+    .court-select {
+        padding: 8px 12px;
+        border: 2px solid #888;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        background: white;
+        color: #888;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .court-select:focus {
+        outline: none;
+        border-color: #27ae60;
+        color: #27ae60;
+    }
+    
+    /* Booking cards */
+    .booking-card {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .booking-date-number {
+        font-size: 1.2rem;
+        min-width: 35px;
+        height: 35px;
+        line-height: 35px;
+    }
+    
+    .booking-content {
+        gap: 8px;
+    }
+    
+    .booking-header h3 {
+        font-size: 1rem;
+    }
+    
+    .time-display, .court-display, .booked-by {
+        font-size: 0.8rem;
+    }
+    
+    .players-needed, .session-full {
+        font-size: 0.8rem;
+        padding: 3px 6px;
+    }
+    
+    .booking-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 12px;
+        width: 100%;
+    }
+    
+    /* Radio buttons smaller on mobile */
+    .radio-dot {
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+    }
+    
+    .radio-dot::after {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .radio-label {
+        font-size: 0.9rem;
+    }
+    
+    /* Divider */
+    .header-divider {
+        margin: 0.5rem 0 1rem 0;
+    }
+    
+    /* Modal adjustments */
+    .modal-content {
+        margin: 5% auto;
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
 @media (max-width: 480px) {
     .booking-datetime {
         flex-direction: column;
@@ -656,5 +811,36 @@ header {
     
     .btn {
         width: 100%;
+    }
+    
+    /* Even smaller buttons on very small screens */
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Compact booking cards */
+    .booking-card {
+        padding: 10px;
+    }
+    
+    .booking-date-number {
+        font-size: 1rem;
+        min-width: 30px;
+        height: 30px;
+        line-height: 30px;
+    }
+    
+    .booking-header h3 {
+        font-size: 0.9rem;
+    }
+    
+    .time-display, .court-display, .booked-by {
+        font-size: 0.75rem;
     }
 }

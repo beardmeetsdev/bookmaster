@@ -43,26 +43,38 @@
                 </label>
             </div>
             <div class="court-filter-container">
-                <label class="radio-option">
-                    <input type="radio" name="courtFilter" value="all" checked>
-                    <span class="radio-dot"></span>
-                    <span class="radio-label">All</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="courtFilter" value="padel">
-                    <span class="radio-dot"></span>
-                    <span class="radio-label">Padel</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="courtFilter" value="tennis">
-                    <span class="radio-dot"></span>
-                    <span class="radio-label">Tennis</span>
-                </label>
-                <label class="radio-option">
-                    <input type="radio" name="courtFilter" value="badminton">
-                    <span class="radio-dot"></span>
-                    <span class="radio-label">Badminton</span>
-                </label>
+                <!-- Desktop radio buttons -->
+                <div class="court-radio-desktop">
+                    <label class="radio-option">
+                        <input type="radio" name="courtFilter" value="all" checked>
+                        <span class="radio-dot"></span>
+                        <span class="radio-label">All</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="courtFilter" value="padel">
+                        <span class="radio-dot"></span>
+                        <span class="radio-label">Padel</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="courtFilter" value="tennis">
+                        <span class="radio-dot"></span>
+                        <span class="radio-label">Tennis</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="courtFilter" value="badminton">
+                        <span class="radio-dot"></span>
+                        <span class="radio-label">Badminton</span>
+                    </label>
+                </div>
+                <!-- Mobile dropdown -->
+                <div class="court-dropdown-mobile">
+                    <select id="courtFilterMobile" class="court-select">
+                        <option value="all">All Courts</option>
+                        <option value="padel">Padel</option>
+                        <option value="tennis">Tennis</option>
+                        <option value="badminton">Badminton</option>
+                    </select>
+                </div>
             </div>
         </div>
 

@@ -207,16 +207,36 @@ class BookingSystem {
             });
         });
         
-        // Court type filter radio buttons
+        // Court type filter radio buttons (desktop)
         const courtRadios = document.querySelectorAll('input[name="courtFilter"]');
         
         courtRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
                 console.log('Court filter changed to:', e.target.value);
                 this.courtTypeFilter = e.target.value;
+                // Update mobile dropdown to match
+                const mobileDropdown = document.getElementById('courtFilterMobile');
+                if (mobileDropdown) {
+                    mobileDropdown.value = e.target.value;
+                }
                 this.renderBookings();
             });
         });
+        
+        // Court type filter dropdown (mobile)
+        const courtDropdown = document.getElementById('courtFilterMobile');
+        if (courtDropdown) {
+            courtDropdown.addEventListener('change', (e) => {
+                console.log('Mobile court filter changed to:', e.target.value);
+                this.courtTypeFilter = e.target.value;
+                // Update desktop radio buttons to match
+                const correspondingRadio = document.querySelector(`input[name="courtFilter"][value="${e.target.value}"]`);
+                if (correspondingRadio) {
+                    correspondingRadio.checked = true;
+                }
+                this.renderBookings();
+            });
+        }
         
         // Create new booking
         document.getElementById('createNew').addEventListener('click', () => {
