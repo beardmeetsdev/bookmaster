@@ -207,6 +207,12 @@ header {
     flex-wrap: wrap;
 }
 
+.header-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #ddd, transparent);
+    margin: 1rem 0 2rem 0;
+}
+
 .toggle-section {
     display: flex;
     align-items: center;
