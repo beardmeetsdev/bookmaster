@@ -15,15 +15,15 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem;
-    border-radius: 15px;
-    margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    background: transparent;
+    padding: 1.5rem 0;
+    margin-bottom: 1rem;
 }
 
 .toggle-container {
