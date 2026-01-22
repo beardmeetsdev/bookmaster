@@ -22,7 +22,7 @@ body {
 
 header {
     background: transparent;
-    padding: 1.5rem 0;
+    padding: 0;
     margin-bottom: 1rem;
 }
 
@@ -176,7 +176,7 @@ input:checked + .slider:hover {
 .header-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
