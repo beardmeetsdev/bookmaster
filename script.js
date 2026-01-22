@@ -14,9 +14,12 @@ const db = firebase.firestore();
 class BookingSystem {
     constructor() {
         this.bookings = [];
-        this.currentEditingId = null;
         this.showAvailableOnly = false;
-        
+        this.courtTypeFilter = 'all';
+        this.init();
+    }
+
+    init() {
         // Load bookings from Firebase instead of localStorage
         this.loadBookingsFromFirebase();
         
@@ -193,13 +196,24 @@ class BookingSystem {
     }
 
     setupEventListeners() {
-        // Radio button toggle events
-        const radioButtons = document.querySelectorAll('input[name="bookingFilter"]');
+        // Availability filter radio buttons
+        const availabilityRadios = document.querySelectorAll('input[name="bookingFilter"]');
         
-        radioButtons.forEach(radio => {
+        availabilityRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
-                console.log('Radio button changed to:', e.target.value);
+                console.log('Availability filter changed to:', e.target.value);
                 this.showAvailableOnly = e.target.value === 'available';
+                this.renderBookings();
+            });
+        });
+        
+        // Court type filter radio buttons
+        const courtRadios = document.querySelectorAll('input[name="courtFilter"]');
+        
+        courtRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                console.log('Court filter changed to:', e.target.value);
+                this.courtTypeFilter = e.target.value;
                 this.renderBookings();
             });
         });
@@ -335,13 +349,21 @@ class BookingSystem {
     renderBookings() {
         const container = document.getElementById('bookingsList');
         
-        // Filter bookings based on toggle state
+        // Filter bookings based on both filter states
         let bookingsToRender = this.bookings;
         
+        // Filter by availability
         if (this.showAvailableOnly) {
-            bookingsToRender = this.bookings.filter(booking => {
+            bookingsToRender = bookingsToRender.filter(booking => {
                 const playersNeeded = this.calculatePlayersNeeded(booking);
                 return playersNeeded > 0;
+            });
+        }
+        
+        // Filter by court type
+        if (this.courtTypeFilter !== 'all') {
+            bookingsToRender = bookingsToRender.filter(booking => {
+                return booking.courtType.toLowerCase() === this.courtTypeFilter;
             });
         }
         
@@ -634,16 +656,30 @@ class BookingSystem {
         return `${displayHour}:${minute} ${ampm}`;
     }
 
+    getFilterDescription() {
+        const availability = this.showAvailableOnly ? 'AVAILABLE' : 'ALL';
+        const courtType = this.courtTypeFilter === 'all' ? 'COURTS' : this.courtTypeFilter.toUpperCase();
+        return `${availability} ${courtType}`;
+    }
+
     async downloadForWhatsApp() {
         console.log('downloadForWhatsApp method started');
         try {
-            // Filter bookings based on toggle state
+            // Filter bookings based on both filter states
             let bookingsToDownload = this.bookings;
             
+            // Filter by availability
             if (this.showAvailableOnly) {
-                bookingsToDownload = this.bookings.filter(booking => {
+                bookingsToDownload = bookingsToDownload.filter(booking => {
                     const playersNeeded = this.calculatePlayersNeeded(booking);
                     return playersNeeded > 0;
+                });
+            }
+            
+            // Filter by court type
+            if (this.courtTypeFilter !== 'all') {
+                bookingsToDownload = bookingsToDownload.filter(booking => {
+                    return booking.courtType.toLowerCase() === this.courtTypeFilter;
                 });
             }
             
@@ -655,11 +691,12 @@ class BookingSystem {
             });
 
             if (sortedBookings.length === 0) {
-                alert(this.showAvailableOnly ? 'No available slots to download!' : 'No bookings to download!');
+                const filterDesc = this.getFilterDescription();
+                alert(`No bookings found for: ${filterDesc}!`);
                 return;
             }
 
-            let textContent = `🏸 RACQUET COURT BOOKINGS - ${this.showAvailableOnly ? 'AVAILABLE SLOTS' : 'ALL BOOKINGS'}\n\n`;
+            let textContent = `🏸 RACQUET COURT BOOKINGS - ${this.getFilterDescription()}\n\n`;
             
             // Calculate spaces properly, excluding 'infinite' bookings
             const validBookings = sortedBookings.filter(booking => booking.maxPlayers !== 'infinite');
@@ -667,11 +704,7 @@ class BookingSystem {
             const totalPlayers = validBookings.reduce((sum, booking) => sum + (booking.players ? booking.players.length : 0), 0);
             const availableSpaces = totalSpaces - totalPlayers;
             
-            if (this.showAvailableOnly) {
-                textContent += `${availableSpaces} SPACES available\n\n`;
-            } else {
-                textContent += `${totalSpaces} TOTAL SPACES\n${availableSpaces} SPACES available\n\n`;
-            }
+            textContent += `${totalSpaces} TOTAL SPACES\n${availableSpaces} SPACES available\n\n`;
 
             for (let i = 0; i < sortedBookings.length; i++) {
                 const booking = sortedBookings[i];

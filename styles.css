@@ -193,16 +193,23 @@ header h1 {
 
 .toggle-section {
     display: flex;
-    justify-content: flex-start;
-    margin-bottom: 2rem;
-    padding-left: 0;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1.5rem 0;
+    gap: 2rem;
 }
 
-.toggle-container {
+.radio-toggle-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin: 1.5rem 0;
+    justify-content: flex-start;
+    gap: 2rem;
+}
+
+.court-filter-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     gap: 1.5rem;
 }
 
