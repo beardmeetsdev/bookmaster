@@ -232,12 +232,29 @@ header {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 1.5rem;
 }
 
-/* Hide mobile dropdown on desktop */
-.court-dropdown-mobile {
-    display: none;
+.court-select {
+    padding: 8px 12px;
+    border: 2px solid #888;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    background: white;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.court-select:focus {
+    outline: none;
+    border-color: #27ae60;
+    color: #27ae60;
+}
+
+.court-select:hover {
+    border-color: #27ae60;
 }
 
 .btn {
@@ -769,34 +786,6 @@ header {
     
     .court-filter-container {
         justify-content: center;
-    }
-    
-    /* Hide desktop radio buttons on mobile */
-    .court-radio-desktop {
-        display: none;
-    }
-    
-    /* Show mobile dropdown */
-    .court-dropdown-mobile {
-        display: block;
-    }
-    
-    .court-select {
-        padding: 8px 12px;
-        border: 2px solid #888;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        background: white;
-        color: #888;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .court-select:focus {
-        outline: none;
-        border-color: #27ae60;
-        color: #27ae60;
     }
     
     /* Booking cards */
