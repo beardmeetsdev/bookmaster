@@ -173,22 +173,13 @@ input:checked + .slider:hover {
     color: #27ae60;
 }
 
-.radio-option:hover .radio-dot {
-    border-color: #27ae60;
-    box-shadow: 0 0 8px rgba(39,174,96,0.3);
-}
-
-header {
-    background: transparent;
-    padding: 1.5rem 0;
-    margin-bottom: 1rem;
-}
-
 .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
 }
 
 .logo h1 {
@@ -210,7 +201,9 @@ header {
 .header-divider {
     height: 1px;
     background: linear-gradient(to right, transparent, #ddd, transparent);
-    margin: 1rem 0 2rem 0;
+    margin: 1rem auto 2rem auto;
+    max-width: 1200px;
+    padding: 0 20px;
 }
 
 .toggle-section {
