@@ -367,6 +367,70 @@ header {
     flex-shrink: 0;
 }
 
+/* 3 Dots Menu */
+.booking-menu {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+
+.menu-dots {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.menu-dots:hover {
+    background: rgba(0,0,0,0.1);
+    color: #333;
+}
+
+.menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 120px;
+    display: none;
+    overflow: hidden;
+}
+
+.menu-dropdown.show {
+    display: block;
+}
+
+.menu-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.menu-item:hover {
+    background: #f5f5f5;
+}
+
+.menu-item.delete-btn:hover {
+    background: #fee;
+    color: #d32f2f;
+}
+
 .btn-small {
     padding: 8px 16px;
     font-size: 14px;
@@ -395,16 +459,6 @@ header {
     font-size: 1rem;
     color: #7f8c8d;
     margin-bottom: 15px;
-}
-
-.booking-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-small {
-    padding: 8px 16px;
-    font-size: 14px;
 }
 
 .players-container {
@@ -441,47 +495,47 @@ header {
     font-size: 0.9rem;
     font-weight: 500;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    color: white;
+    color: #333;
 }
 
 .player-button.player-1 {
-    background-color: #27ae60;
-    border-color: #229954;
+    background-color: #a8e6cf;
+    border-color: #7fcdbb;
 }
 
 .player-button.player-2 {
-    background-color: #3498db;
-    border-color: #2980b9;
+    background-color: #b3d9ff;
+    border-color: #8fc4e8;
 }
 
 .player-button.player-3 {
-    background-color: #e74c3c;
-    border-color: #c0392b;
+    background-color: #ffb3ba;
+    border-color: #ff999f;
 }
 
 .player-button.player-4 {
-    background-color: #f39c12;
-    border-color: #e67e22;
+    background-color: #ffd9b3;
+    border-color: #ffc299;
 }
 
 .player-button.player-5 {
-    background-color: #9b59b6;
-    border-color: #8e44ad;
+    background-color: #e6b3ff;
+    border-color: #d199ff;
 }
 
 .player-button.player-6 {
-    background-color: #1abc9c;
-    border-color: #16a085;
+    background-color: #b3f0e6;
+    border-color: #8fe6d9;
 }
 
 .player-button.player-7 {
-    background-color: #34495e;
-    border-color: #2c3e50;
+    background-color: #d4d4d4;
+    border-color: #b8b8b8;
 }
 
 .player-button.player-8 {
-    background-color: #95a5a6;
-    border-color: #7f8c8d;
+    background-color: #e8e8e8;
+    border-color: #d0d0d0;
 }
 
 .no-bookings {

@@ -249,6 +249,33 @@ class BookingSystem {
             this.downloadForWhatsApp();
         });
 
+        // 3 dots menu functionality
+        document.addEventListener('click', (e) => {
+            // Handle menu dots click
+            if (e.target.classList.contains('menu-dots')) {
+                e.stopPropagation();
+                const bookingId = e.target.dataset.id;
+                const dropdown = document.getElementById(`menu-${bookingId}`);
+                
+                // Close all other dropdowns
+                document.querySelectorAll('.menu-dropdown').forEach(menu => {
+                    if (menu !== dropdown) {
+                        menu.classList.remove('show');
+                    }
+                });
+                
+                // Toggle current dropdown
+                dropdown.classList.toggle('show');
+            }
+            
+            // Close dropdowns when clicking outside
+            if (!e.target.closest('.booking-menu')) {
+                document.querySelectorAll('.menu-dropdown').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
         // Modal controls
         document.querySelector('.close').addEventListener('click', () => {
             this.closeModal();
@@ -508,13 +535,12 @@ class BookingSystem {
                                 ${playersNeededDisplay}
                             </div>
                         </div>
-                        <div class="booking-actions">
-                            <button class="btn btn-secondary btn-small edit-btn" data-id="${booking.id}">
-                                ✏️ Edit
-                            </button>
-                            <button class="btn btn-danger btn-small delete-btn" data-id="${booking.id}">
-                                🗑️ Delete
-                            </button>
+                        <div class="booking-menu">
+                            <button class="menu-dots" data-id="${booking.id}">⋮</button>
+                            <div class="menu-dropdown" id="menu-${booking.id}">
+                                <button class="menu-item edit-btn" data-id="${booking.id}">✏️ Edit</button>
+                                <button class="menu-item delete-btn" data-id="${booking.id}">❌ Delete</button>
+                            </div>
                         </div>
                     </div>
                 </div>
