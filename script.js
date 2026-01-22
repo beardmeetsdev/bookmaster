@@ -454,8 +454,8 @@ class BookingSystem {
             }
         };
         
-        // Main title: Abbreviated format with sport type in red
-        const title = `${dayName} ${dayNumber}${getOrdinalSuffix(dayNumber)} ${monthName} (${startTimeFormatted} - ${endTimeFormatted})`;
+        // Main title: Time range with day in parentheses
+        const title = `${startTimeFormatted} - ${endTimeFormatted} (${dayName})`;
         
         // Time subtitle with conditional court and booked by info
         let timeSubtitle = booking.courtType;
