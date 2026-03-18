@@ -20,6 +20,12 @@ class BookingSystem {
         this.init();
     }
 
+    formatPlayerNameForChip(name) {
+        const safe = (name || '').toString().trim();
+        if (!safe) return '';
+        return safe.length > 8 ? safe.slice(0, 8) : safe;
+    }
+
     init() {
         // Load bookings from Firebase instead of localStorage
         this.loadBookingsFromFirebase();
@@ -441,7 +447,8 @@ class BookingSystem {
                             ? booking.players
                                   .map((player, index) => {
                                       const playerClass = `player-${(index % 8) + 1}`;
-                                      return `<span class="player-button ${playerClass}">${player}</span>`;
+                                      const displayPlayer = this.formatPlayerNameForChip(player);
+                                      return `<span class="player-button ${playerClass}">${displayPlayer}</span>`;
                                   })
                                   .join('')
                             : '';
@@ -700,7 +707,8 @@ class BookingSystem {
         const playersText = booking.players && booking.players.length > 0
             ? booking.players.map((player, index) => {
                 const playerClass = `player-${(index % 8) + 1}`; // Cycle through 8 colors
-                return `<span class="player-button ${playerClass}">${player}</span>`;
+                const displayPlayer = this.formatPlayerNameForChip(player);
+                return `<span class="player-button ${playerClass}">${displayPlayer}</span>`;
             }).join('')
             : '<span class="player-button player-8">No players listed</span>';
 
