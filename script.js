@@ -16,8 +16,7 @@ class BookingSystem {
         this.bookings = [];
         this.showAvailableOnly = false;
         this.courtTypeFilter = 'all';
-        this.currentCalendarMonth = new Date();
-        this.currentCalendarMonth.setDate(1);
+        this.currentCalendarMonth = this.getStartOfWeek(new Date());
         this.init();
     }
 
@@ -233,7 +232,7 @@ class BookingSystem {
         const prevBtn = document.getElementById('calendarPrev');
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
-                this.currentCalendarMonth = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth() - 1, 1);
+                this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, -7);
                 this.renderBookings();
             });
         }
@@ -241,7 +240,7 @@ class BookingSystem {
         const nextBtn = document.getElementById('calendarNext');
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
-                this.currentCalendarMonth = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth() + 1, 1);
+                this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, 7);
                 this.renderBookings();
             });
         }
@@ -404,12 +403,11 @@ class BookingSystem {
         const container = document.getElementById('bookingsList');
         const monthLabel = document.getElementById('calendarMonthLabel');
 
-        const monthStart = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth(), 1);
-        const monthEnd = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth() + 1, 0);
-        const monthName = monthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const weekStart = this.getStartOfWeek(this.currentCalendarMonth);
+        const weekEnd = this.addDays(weekStart, 6);
 
         if (monthLabel) {
-            monthLabel.textContent = monthName;
+            monthLabel.textContent = `${this.formatShortDate(weekStart)} - ${this.formatShortDate(weekEnd)}`;
         }
 
         const bookingsByDate = new Map();
@@ -421,29 +419,34 @@ class BookingSystem {
             bookingsByDate.get(key).push(booking);
         });
 
-        const startDayOfWeek = (monthStart.getDay() + 6) % 7;
-        const daysInMonth = monthEnd.getDate();
-        const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
 
         const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-        let html = '<div class="calendar">';
-        html += '<div class="calendar-weekdays">' + weekdayLabels.map(d => `<div class="calendar-weekday">${d}</div>`).join('') + '</div>';
-        html += '<div class="calendar-grid">';
+        let html = '<div class="week-view" id="weekView">';
+        html += '<div class="week-header">';
+        html += weekdayLabels
+            .map((d, i) => {
+                const date = this.addDays(weekStart, i);
+                const isToday = this.toDateKey(date) === new Date().toISOString().split('T')[0];
+                return `
+                    <div class="week-header-cell ${isToday ? 'week-header-cell--today' : ''}">
+                        <div class="week-header-dow">${d}</div>
+                        <div class="week-header-date">${date.getDate()}</div>
+                    </div>
+                `;
+            })
+            .join('');
+        html += '</div>';
 
-        for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
-            const dayNumber = cellIndex - startDayOfWeek + 1;
-            const isInMonth = dayNumber >= 1 && dayNumber <= daysInMonth;
-            const cellDate = new Date(monthStart.getFullYear(), monthStart.getMonth(), dayNumber);
-            const dateKey = isInMonth
-                ? `${cellDate.getFullYear()}-${(cellDate.getMonth() + 1).toString().padStart(2, '0')}-${cellDate.getDate().toString().padStart(2, '0')}`
-                : null;
+        html += '<div class="week-grid">';
 
-            const events = isInMonth && bookingsByDate.has(dateKey) ? bookingsByDate.get(dateKey) : [];
-            const isToday = isInMonth && dateKey === new Date().toISOString().split('T')[0];
+        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+            const cellDate = this.addDays(weekStart, dayIndex);
+            const dateKey = this.toDateKey(cellDate);
+            const events = bookingsByDate.has(dateKey) ? bookingsByDate.get(dateKey) : [];
+            const isToday = dateKey === new Date().toISOString().split('T')[0];
 
-            html += `<div class="calendar-day ${isInMonth ? '' : 'calendar-day--outside'} ${isToday ? 'calendar-day--today' : ''}">`;
-            html += `<div class="calendar-day-number">${isInMonth ? dayNumber : ''}</div>`;
+            html += `<div class="week-day ${isToday ? 'week-day--today' : ''}">`;
             html += '<div class="calendar-events">';
 
             if (events.length > 0) {
@@ -491,6 +494,114 @@ class BookingSystem {
         html += '</div>';
 
         container.innerHTML = html;
+
+        const weekView = document.getElementById('weekView');
+        if (weekView) {
+            this.attachWeekScrollNavigation(weekView);
+        }
+    }
+
+    attachWeekScrollNavigation(weekViewEl) {
+        if (this._weekScrollAttached) return;
+        this._weekScrollAttached = true;
+
+        let wheelAccum = 0;
+        let wheelTimer = null;
+
+        weekViewEl.addEventListener(
+            'wheel',
+            (e) => {
+                const absX = Math.abs(e.deltaX);
+                const absY = Math.abs(e.deltaY);
+
+                if (absX <= absY) {
+                    return;
+                }
+
+                e.preventDefault();
+
+                wheelAccum += e.deltaX;
+                clearTimeout(wheelTimer);
+                wheelTimer = setTimeout(() => {
+                    wheelAccum = 0;
+                }, 250);
+
+                const threshold = 140;
+                if (wheelAccum > threshold) {
+                    wheelAccum = 0;
+                    this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, 7);
+                    this.renderBookings();
+                } else if (wheelAccum < -threshold) {
+                    wheelAccum = 0;
+                    this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, -7);
+                    this.renderBookings();
+                }
+            },
+            { passive: false }
+        );
+
+        let touchStartX = null;
+        let touchStartY = null;
+
+        weekViewEl.addEventListener(
+            'touchstart',
+            (e) => {
+                const t = e.touches && e.touches[0];
+                if (!t) return;
+                touchStartX = t.clientX;
+                touchStartY = t.clientY;
+            },
+            { passive: true }
+        );
+
+        weekViewEl.addEventListener(
+            'touchend',
+            (e) => {
+                if (touchStartX == null || touchStartY == null) return;
+                const t = e.changedTouches && e.changedTouches[0];
+                if (!t) return;
+
+                const dx = t.clientX - touchStartX;
+                const dy = t.clientY - touchStartY;
+                touchStartX = null;
+                touchStartY = null;
+
+                if (Math.abs(dx) <= Math.abs(dy)) return;
+
+                const threshold = 60;
+                if (dx < -threshold) {
+                    this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, 7);
+                    this.renderBookings();
+                } else if (dx > threshold) {
+                    this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, -7);
+                    this.renderBookings();
+                }
+            },
+            { passive: true }
+        );
+    }
+
+    addDays(date, days) {
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+    }
+
+    getStartOfWeek(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = (day + 6) % 7;
+        d.setDate(d.getDate() - diff);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+
+    toDateKey(date) {
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    }
+
+    formatShortDate(date) {
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
     }
 
     createBookingCard(booking) {
