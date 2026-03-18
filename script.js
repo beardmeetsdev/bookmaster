@@ -458,19 +458,35 @@ class BookingSystem {
                         return timestampA - timestampB;
                     })
                     .forEach(booking => {
-                        const startTimeDisplay = booking.startTime ? booking.startTime.slice(0, 5) : '';
-                        const title = `${startTimeDisplay} ${booking.courtType}`.trim();
+                        const startHour = this.formatHour(booking.startTime);
+                        const durationMins = this.getBookingDurationMinutes(booking);
+                        const title = `${startHour}${durationMins ? ` (${durationMins}m)` : ''} ${booking.courtType || ''}`.trim();
                         const playersNeeded = this.calculatePlayersNeeded(booking);
+                        const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
+                        const bookedBy = booking.bookedBy ? booking.bookedBy.trim() : '';
+                        const meta = `Booked by ${bookedBy || 'Unknown'}${courtNumber ? ` on Court ${courtNumber}` : ''}`;
+                        const playersHtml = booking.players && booking.players.length > 0
+                            ? booking.players
+                                  .map((player, index) => {
+                                      const playerClass = `player-${(index % 8) + 1}`;
+                                      return `<span class="player-button ${playerClass}">${player}</span>`;
+                                  })
+                                  .join('')
+                            : '';
                         html += `
                             <div class="calendar-event ${playersNeeded === 0 ? 'calendar-event--full' : ''}">
-                                <div class="calendar-event-main">${title}</div>
-                                <div class="booking-menu">
-                                    <button class="menu-dots" data-id="${booking.id}">⋮</button>
-                                    <div class="menu-dropdown" id="menu-${booking.id}">
-                                        <button class="menu-item edit-btn" data-id="${booking.id}">✏️ Edit</button>
-                                        <button class="menu-item delete-btn" data-id="${booking.id}">❌ Delete</button>
+                                <div class="calendar-event-top">
+                                    <div class="calendar-event-main">${title}</div>
+                                    <div class="booking-menu">
+                                        <button class="menu-dots" data-id="${booking.id}">⋮</button>
+                                        <div class="menu-dropdown" id="menu-${booking.id}">
+                                            <button class="menu-item edit-btn" data-id="${booking.id}">✏️ Edit</button>
+                                            <button class="menu-item delete-btn" data-id="${booking.id}">❌ Delete</button>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="calendar-event-meta">${meta}</div>
+                                ${playersHtml ? `<div class="calendar-event-players">${playersHtml}</div>` : ''}
                             </div>
                         `;
                     });
@@ -602,6 +618,26 @@ class BookingSystem {
 
     formatShortDate(date) {
         return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    }
+
+    formatHour(time) {
+        if (!time) return '';
+        const hours = time.split(':')[0];
+        return `${parseInt(hours, 10)}h`;
+    }
+
+    getBookingDurationMinutes(booking) {
+        if (booking && booking.sessionLength) {
+            const parsed = parseInt(booking.sessionLength, 10);
+            if (!Number.isNaN(parsed)) return parsed;
+        }
+
+        if (!booking || !booking.startTime || !booking.endTime) return null;
+        const start = new Date(`2000-01-01 ${booking.startTime}`);
+        const end = new Date(`2000-01-01 ${booking.endTime}`);
+        const diffMs = end - start;
+        if (!Number.isFinite(diffMs) || diffMs <= 0) return null;
+        return Math.round(diffMs / 60000);
     }
 
     createBookingCard(booking) {

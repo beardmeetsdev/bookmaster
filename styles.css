@@ -415,6 +415,7 @@ input:checked + .slider:hover {
     border-radius: 10px;
     background: rgba(231, 76, 60, 0.10);
     border: 1px solid rgba(231, 76, 60, 0.18);
+    flex-direction: column;
 }
 
 .calendar-event--full {
@@ -430,6 +431,28 @@ input:checked + .slider:hover {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.calendar-event-top {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.calendar-event-meta {
+    width: 100%;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    line-height: 1.2;
+}
+
+.calendar-event-players {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .week-view {
