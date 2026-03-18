@@ -844,6 +844,14 @@ button:disabled {
     overflow: hidden;
 }
 
+.player-button.player-placeholder {
+    background-color: #f0f0f0;
+    border-color: #d7d7d7;
+    color: #9aa0a6;
+    font-weight: 900;
+    cursor: default;
+}
+
 .players-input-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
