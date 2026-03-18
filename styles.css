@@ -403,8 +403,9 @@ input:checked + .slider:hover {
 }
 
 .calendar-day--today {
-    border-color: rgba(39, 174, 96, 0.35);
-    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-color: rgba(243, 156, 18, 0.7);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .calendar-day-number {
@@ -495,8 +496,9 @@ input:checked + .slider:hover {
 }
 
 .week-header-cell--today {
-    border-color: rgba(39, 174, 96, 0.35);
-    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.10), 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-color: rgba(243, 156, 18, 0.75);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .week-header-dow {
@@ -530,8 +532,9 @@ input:checked + .slider:hover {
 }
 
 .week-day--today {
-    border-color: rgba(39, 174, 96, 0.35);
-    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-color: rgba(243, 156, 18, 0.55);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 @media (max-width: 900px) {
