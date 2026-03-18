@@ -328,6 +328,19 @@ input:checked + .slider:hover {
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
+.btn:disabled,
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-secondary:disabled {
+    background-color: #bdc3c7;
+    color: #ffffff;
+}
+
 .btn-danger {
     background-color: #e74c3c;
     color: white;
