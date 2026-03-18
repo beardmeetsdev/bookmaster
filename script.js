@@ -270,6 +270,24 @@ class BookingSystem {
             });
         }
 
+        const bookingsList = document.getElementById('bookingsList');
+        if (bookingsList) {
+            bookingsList.addEventListener('dblclick', (e) => {
+                if (e.target && e.target.closest && e.target.closest('.calendar-event')) return;
+
+                const dayEl = e.target && e.target.closest ? e.target.closest('.week-day') : null;
+                if (!dayEl) return;
+
+                const dateKey = dayEl.getAttribute('data-date');
+                this.openModal(null);
+
+                if (dateKey) {
+                    const dateInput = document.getElementById('date');
+                    if (dateInput) dateInput.value = dateKey;
+                }
+            });
+        }
+
         // Modal controls
         document.querySelector('.close').addEventListener('click', () => {
             this.closeModal();
@@ -439,11 +457,11 @@ class BookingSystem {
 
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
             const cellDate = this.addDays(weekStart, dayIndex);
-            const dateKey = this.toDateKey(cellDate);
+            const dateKey = cellDate.toISOString().split('T')[0];
             const events = bookingsByDate.has(dateKey) ? bookingsByDate.get(dateKey) : [];
             const isToday = dateKey === new Date().toISOString().split('T')[0];
 
-            html += `<div class="week-day ${isToday ? 'week-day--today' : ''}">`;
+            html += `<div class="week-day ${isToday ? 'week-day--today' : ''}" data-date="${dateKey}">`;
             html += '<div class="calendar-events">';
 
             if (events.length > 0) {
