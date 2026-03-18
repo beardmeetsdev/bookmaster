@@ -1038,7 +1038,7 @@ class BookingSystem {
 
                 const bookedByIsKnown = bookedByNorm && bookedByNorm !== 'unknown' && bookedByNorm !== '?';
                 const bookedByInPlayers = bookedByIsKnown && playerNorms.includes(bookedByNorm);
-                const bookedByPrefix = bookedByIsKnown && !bookedByInPlayers ? '❌ ' : '';
+                const bookedByPrefix = bookedByIsKnown && !bookedByInPlayers ? '↔ ' : '';
                 const bookedByDisplay = `${bookedByPrefix}${bookedByRaw}`;
 
                 const line1 = `${timeDisplay} ${timeRange}${courtText} (${bookedByDisplay} Booking)`;

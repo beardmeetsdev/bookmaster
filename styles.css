@@ -564,12 +564,19 @@ button:disabled {
 }
 
 @media (max-width: 600px) {
+    .week-view {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .week-header {
         gap: 6px;
+        width: calc(100% * 7 / 3);
     }
 
     .week-grid {
         gap: 6px;
+        width: calc(100% * 7 / 3);
     }
 
     .week-header-date {
