@@ -45,6 +45,16 @@ class BookingSystem {
         return `${namePart} court (${courtPart})`;
     }
 
+    getMinWeekStart() {
+        return this.getStartOfWeek(new Date());
+    }
+
+    clampToMinWeek(date) {
+        const minWeekStart = this.getMinWeekStart();
+        const start = this.getStartOfWeek(date);
+        return start.getTime() < minWeekStart.getTime() ? minWeekStart : start;
+    }
+
     init() {
         // Load bookings from Firebase instead of localStorage
         this.loadBookingsFromFirebase();
@@ -257,7 +267,8 @@ class BookingSystem {
         const prevBtn = document.getElementById('calendarPrev');
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
-                this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, -7);
+                const candidate = this.addDays(this.currentCalendarMonth, -7);
+                this.currentCalendarMonth = this.clampToMinWeek(candidate);
                 this.renderBookings();
             });
         }
@@ -416,9 +427,18 @@ class BookingSystem {
     renderCalendar(bookingsToRender) {
         const container = document.getElementById('bookingsList');
         const monthLabel = document.getElementById('calendarMonthLabel');
+        const prevBtn = document.getElementById('calendarPrev');
 
-        const weekStart = this.getStartOfWeek(this.currentCalendarMonth);
+        const minWeekStart = this.getMinWeekStart();
+        const weekStart = this.clampToMinWeek(this.currentCalendarMonth);
+        if (weekStart.getTime() !== this.getStartOfWeek(this.currentCalendarMonth).getTime()) {
+            this.currentCalendarMonth = weekStart;
+        }
         const weekEnd = this.addDays(weekStart, 6);
+
+        if (prevBtn) {
+            prevBtn.disabled = weekStart.getTime() <= minWeekStart.getTime();
+        }
 
         if (monthLabel) {
             monthLabel.textContent = `${this.formatShortDate(weekStart)} - ${this.formatShortDate(weekEnd)}`;
@@ -572,7 +592,8 @@ class BookingSystem {
                     this.renderBookings();
                 } else if (wheelAccum < -threshold) {
                     wheelAccum = 0;
-                    this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, -7);
+                    const candidate = this.addDays(this.currentCalendarMonth, -7);
+                    this.currentCalendarMonth = this.clampToMinWeek(candidate);
                     this.renderBookings();
                 }
             },
@@ -612,7 +633,8 @@ class BookingSystem {
                     this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, 7);
                     this.renderBookings();
                 } else if (dx > threshold) {
-                    this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, -7);
+                    const candidate = this.addDays(this.currentCalendarMonth, -7);
+                    this.currentCalendarMonth = this.clampToMinWeek(candidate);
                     this.renderBookings();
                 }
             },
