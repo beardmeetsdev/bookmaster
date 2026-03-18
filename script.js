@@ -16,6 +16,8 @@ class BookingSystem {
         this.bookings = [];
         this.showAvailableOnly = false;
         this.courtTypeFilter = 'all';
+        this.currentCalendarMonth = new Date();
+        this.currentCalendarMonth.setDate(1);
         this.init();
     }
 
@@ -228,6 +230,22 @@ class BookingSystem {
             this.downloadForWhatsApp();
         });
 
+        const prevBtn = document.getElementById('calendarPrev');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                this.currentCalendarMonth = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth() - 1, 1);
+                this.renderBookings();
+            });
+        }
+
+        const nextBtn = document.getElementById('calendarNext');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                this.currentCalendarMonth = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth() + 1, 1);
+                this.renderBookings();
+            });
+        }
+
         // 3 dots menu functionality
         document.addEventListener('click', (e) => {
             // Handle menu dots click
@@ -277,42 +295,6 @@ class BookingSystem {
                 this.closeModal();
             }
         });
-    }
-
-    loadBookings() {
-        const stored = localStorage.getItem('racquetBookings');
-        if (stored) {
-            this.bookings = JSON.parse(stored);
-        } else {
-            // Add some sample data for demonstration
-            this.bookings = [
-                {
-                    id: this.generateId(),
-                    courtType: 'Padel',
-                    maxPlayers: '4',
-                    court: 'Court 1',
-                    date: this.getDateString(1),
-                    startTime: '09:00',
-                    sessionLength: '90',
-                    endTime: '10:30',
-                    bookedBy: 'John Smith',
-                    players: ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Emma Wilson']
-                },
-                {
-                    id: this.generateId(),
-                    courtType: 'Tennis',
-                    maxPlayers: '4',
-                    court: 'Court 2',
-                    date: this.getDateString(2),
-                    startTime: '14:00',
-                    sessionLength: '90',
-                    endTime: '15:30',
-                    bookedBy: 'Alice Brown',
-                    players: ['Alice Brown', 'Tom Harris']
-                }
-            ];
-            this.saveBookings();
-        }
     }
 
     generateId() {
@@ -400,17 +382,7 @@ class BookingSystem {
             return timestampA - timestampB;
         });
 
-        if (bookingsToRender.length === 0) {
-            container.innerHTML = `
-                <div class="no-bookings">
-                    <h3>${this.showAvailableOnly ? 'No available slots' : 'No bookings found'}</h3>
-                    <p>${this.showAvailableOnly ? 'All bookings are full!' : 'Create your first booking to get started.'}</p>
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = bookingsToRender.map(booking => this.createBookingCard(booking)).join('');
+        this.renderCalendar(bookingsToRender);
         
         // Add event listeners to the new buttons
         container.querySelectorAll('.edit-btn').forEach(btn => {
@@ -426,6 +398,99 @@ class BookingSystem {
                 await this.deleteBooking(id);
             });
         });
+    }
+
+    renderCalendar(bookingsToRender) {
+        const container = document.getElementById('bookingsList');
+        const monthLabel = document.getElementById('calendarMonthLabel');
+
+        const monthStart = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth(), 1);
+        const monthEnd = new Date(this.currentCalendarMonth.getFullYear(), this.currentCalendarMonth.getMonth() + 1, 0);
+        const monthName = monthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+        if (monthLabel) {
+            monthLabel.textContent = monthName;
+        }
+
+        const bookingsByDate = new Map();
+        bookingsToRender.forEach(booking => {
+            const key = booking.date;
+            if (!bookingsByDate.has(key)) {
+                bookingsByDate.set(key, []);
+            }
+            bookingsByDate.get(key).push(booking);
+        });
+
+        const startDayOfWeek = (monthStart.getDay() + 6) % 7;
+        const daysInMonth = monthEnd.getDate();
+        const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+
+        const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        let html = '<div class="calendar">';
+        html += '<div class="calendar-weekdays">' + weekdayLabels.map(d => `<div class="calendar-weekday">${d}</div>`).join('') + '</div>';
+        html += '<div class="calendar-grid">';
+
+        for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
+            const dayNumber = cellIndex - startDayOfWeek + 1;
+            const isInMonth = dayNumber >= 1 && dayNumber <= daysInMonth;
+            const cellDate = new Date(monthStart.getFullYear(), monthStart.getMonth(), dayNumber);
+            const dateKey = isInMonth
+                ? `${cellDate.getFullYear()}-${(cellDate.getMonth() + 1).toString().padStart(2, '0')}-${cellDate.getDate().toString().padStart(2, '0')}`
+                : null;
+
+            const events = isInMonth && bookingsByDate.has(dateKey) ? bookingsByDate.get(dateKey) : [];
+            const isToday = isInMonth && dateKey === new Date().toISOString().split('T')[0];
+
+            html += `<div class="calendar-day ${isInMonth ? '' : 'calendar-day--outside'} ${isToday ? 'calendar-day--today' : ''}">`;
+            html += `<div class="calendar-day-number">${isInMonth ? dayNumber : ''}</div>`;
+            html += '<div class="calendar-events">';
+
+            if (events.length > 0) {
+                events
+                    .slice()
+                    .sort((a, b) => {
+                        const timestampA = new Date(a.date + ' ' + a.startTime).getTime();
+                        const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
+                        return timestampA - timestampB;
+                    })
+                    .forEach(booking => {
+                        const startTimeDisplay = booking.startTime ? booking.startTime.slice(0, 5) : '';
+                        const title = `${startTimeDisplay} ${booking.courtType}`.trim();
+                        const playersNeeded = this.calculatePlayersNeeded(booking);
+                        html += `
+                            <div class="calendar-event ${playersNeeded === 0 ? 'calendar-event--full' : ''}">
+                                <div class="calendar-event-main">${title}</div>
+                                <div class="booking-menu">
+                                    <button class="menu-dots" data-id="${booking.id}">⋮</button>
+                                    <div class="menu-dropdown" id="menu-${booking.id}">
+                                        <button class="menu-item edit-btn" data-id="${booking.id}">✏️ Edit</button>
+                                        <button class="menu-item delete-btn" data-id="${booking.id}">❌ Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+            }
+
+            html += '</div>';
+            html += '</div>';
+        }
+
+        html += '</div>';
+
+        if (bookingsToRender.length === 0) {
+            html += `
+                <div class="no-bookings">
+                    <h3>${this.showAvailableOnly ? 'No available slots' : 'No bookings found'}</h3>
+                    <p>${this.showAvailableOnly ? 'All bookings are full!' : 'Create your first booking to get started.'}</p>
+                </div>
+            `;
+        }
+
+        html += '</div>';
+
+        container.innerHTML = html;
     }
 
     createBookingCard(booking) {

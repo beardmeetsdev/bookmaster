@@ -324,9 +324,147 @@ input:checked + .slider:hover {
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
+.calendar-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 12px 0 16px 0;
+}
+
+.calendar-month-label {
+    flex: 1;
+    text-align: center;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
 .bookings-container {
     display: grid;
     gap: 20px;
+}
+
+.calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    padding: 0 2px;
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #7f8c8d;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day {
+    background: white;
+    border-radius: 12px;
+    min-height: 110px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.calendar-day--outside {
+    background: rgba(255, 255, 255, 0.55);
+    box-shadow: none;
+}
+
+.calendar-day--today {
+    border-color: rgba(39, 174, 96, 0.35);
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.calendar-day-number {
+    font-weight: 800;
+    color: #2c3e50;
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.calendar-events {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+}
+
+.calendar-event {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: rgba(231, 76, 60, 0.10);
+    border: 1px solid rgba(231, 76, 60, 0.18);
+}
+
+.calendar-event--full {
+    background: rgba(39, 174, 96, 0.12);
+    border-color: rgba(39, 174, 96, 0.22);
+}
+
+.calendar-event-main {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2c3e50;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .calendar-grid {
+        gap: 6px;
+    }
+
+    .calendar-day {
+        min-height: 95px;
+        padding: 8px;
+        border-radius: 10px;
+    }
+
+    .calendar-event-main {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .calendar-controls {
+        gap: 8px;
+    }
+
+    .calendar-weekday {
+        font-size: 0.75rem;
+    }
+
+    .calendar-day {
+        min-height: 80px;
+        padding: 6px;
+    }
+
+    .calendar-event {
+        padding: 5px 6px;
+    }
 }
 
 .booking-card {
