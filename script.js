@@ -1,6 +1,6 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDklNMETqvQctyioT5PQWbqD1Q0pHdYXo4",
+  apiKey: "AIzaSyBg9p86nB_OpuPtqAWLk6pEAo6azSwEwbU",
   authDomain: "bookmaster-booking.firebaseapp.com",
   projectId: "bookmaster-booking",
   storageBucket: "bookmaster-booking.firebasestorage.app",
