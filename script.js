@@ -26,6 +26,24 @@ class BookingSystem {
         return safe.length > 8 ? safe.slice(0, 8) : safe;
     }
 
+    renderPlayerSlots(players, slotCount = 4) {
+        const arr = Array.isArray(players) ? players.filter(Boolean) : [];
+        const out = [];
+
+        for (let i = 0; i < slotCount; i++) {
+            const raw = (arr[i] || '').toString().trim();
+            if (raw) {
+                const playerClass = `player-${(i % 8) + 1}`;
+                const displayPlayer = this.formatPlayerNameForChip(raw);
+                out.push(`<span class="player-button ${playerClass}">${displayPlayer}</span>`);
+            } else {
+                out.push(`<span class="player-button player-placeholder">-</span>`);
+            }
+        }
+
+        return out.join('');
+    }
+
     formatCourtTypeShort(courtType) {
         const safe = (courtType || '').toString().trim();
         if (!safe) return '';
@@ -499,22 +517,14 @@ class BookingSystem {
                         const title = `${startHour}${durationMins ? ` (${durationMins}m)` : ''} ${courtTypeShort}`.trim();
                         const playersNeeded = this.calculatePlayersNeeded(booking);
                         const meta = this.formatBookedByCourtMeta(booking);
-                        const playersHtml = booking.players && booking.players.length > 0
-                            ? booking.players
-                                  .map((player, index) => {
-                                      const playerClass = `player-${(index % 8) + 1}`;
-                                      const displayPlayer = this.formatPlayerNameForChip(player);
-                                      return `<span class="player-button ${playerClass}">${displayPlayer}</span>`;
-                                  })
-                                  .join('')
-                            : '';
+                        const playersHtml = this.renderPlayerSlots(booking.players, 4);
                         html += `
                             <div class="calendar-event ${playersNeeded === 0 ? 'calendar-event--full' : ''}" data-id="${booking.id}" role="button" tabindex="0">
                                 <div class="calendar-event-top">
                                     <div class="calendar-event-main">${title}</div>
                                 </div>
                                 <div class="calendar-event-meta">${meta}</div>
-                                ${playersHtml ? `<div class="calendar-event-players">${playersHtml}</div>` : ''}
+                                <div class="calendar-event-players">${playersHtml}</div>
                             </div>
                         `;
                     });
@@ -755,13 +765,7 @@ class BookingSystem {
         const playersNeeded = calculatePlayersNeeded(booking);
         
         // Players on single line with button-style and colors
-        const playersText = booking.players && booking.players.length > 0
-            ? booking.players.map((player, index) => {
-                const playerClass = `player-${(index % 8) + 1}`; // Cycle through 8 colors
-                const displayPlayer = this.formatPlayerNameForChip(player);
-                return `<span class="player-button ${playerClass}">${displayPlayer}</span>`;
-            }).join('')
-            : '<span class="player-button player-8">No players listed</span>';
+        const playersText = this.renderPlayerSlots(booking.players, 4);
 
         // Players needed display
         const playersNeededDisplay = playersNeeded > 0 
@@ -1015,22 +1019,35 @@ class BookingSystem {
                 const dateObj = new Date(booking.date);
                 const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                 const dayNumber = dateObj.getDate();
-                const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
-                const timeDisplay = `${dayName} ${dayNumber}${this.getOrdinalSuffix(dayNumber)} ${monthName}`;
-                const startHour = this.formatHour(booking.startTime);
-                const durationMins = this.getBookingDurationMinutes(booking);
-                const title = `${startHour}${durationMins ? ` (${durationMins}m)` : ''} ${booking.courtType || ''}`.trim();
-                const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
-                const bookedByDisplay = booking.bookedBy || 'Unknown';
-                const where = `${bookedByDisplay}${courtNumber ? ` (court ${courtNumber})` : ''}`;
-                const playersNeeded = this.calculatePlayersNeeded(booking);
-                const playersLine = booking.players && booking.players.length > 0 ? booking.players.join(' • ') : 'No players';
-                const needLine = playersNeeded > 0 ? ` (${playersNeeded} still needed)` : '';
+                const timeDisplay = `${dayName} ${dayNumber}${this.getOrdinalSuffix(dayNumber)}`;
 
-                return `*${timeDisplay}*\n${title}\n${where}\n👥 ${playersLine}${needLine}`;
+                const durationMins = this.getBookingDurationMinutes(booking);
+                const startTime = booking.startTime;
+                const endTime = this.addMinutesToTime(startTime, durationMins || 60);
+                const timeRange = this.formatTimeRange(startTime, endTime);
+
+                const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
+                const courtText = courtNumber ? ` on court ${courtNumber}` : '';
+
+                const bookedByRaw = (booking.bookedBy || 'Unknown').toString().trim();
+                const playersArr = Array.isArray(booking.players) ? booking.players.filter(Boolean) : [];
+
+                const normalize = (s) => (s || '').toString().trim().toLowerCase();
+                const bookedByNorm = normalize(bookedByRaw);
+                const playerNorms = playersArr.map(p => normalize(p));
+
+                const bookedByIsKnown = bookedByNorm && bookedByNorm !== 'unknown' && bookedByNorm !== '?';
+                const bookedByInPlayers = bookedByIsKnown && playerNorms.includes(bookedByNorm);
+                const bookedByPrefix = bookedByIsKnown && !bookedByInPlayers ? '❌ ' : '';
+                const bookedByDisplay = `${bookedByPrefix}${bookedByRaw}`;
+
+                const line1 = `${timeDisplay} ${timeRange}${courtText} (${bookedByDisplay} Booking)`;
+                const line2 = playersArr.length > 0 ? playersArr.join(' • ') : 'No players';
+
+                return `${line1}\n${line2}`;
             };
 
-            let textContent = `🏸 RACQUET COURT BOOKINGS\n\n`;
+            let textContent = '';
 
             if (bookedSlots.length > 0) {
                 textContent += `*NEXT GAMES*\n\n`;
@@ -1058,6 +1075,37 @@ class BookingSystem {
             console.error('Error generating WhatsApp text:', error);
             alert('Failed to generate text file. Please try again.');
         }
+    }
+
+    addMinutesToTime(time, minutesToAdd) {
+        const [hh, mm] = (time || '00:00').split(':').map(n => parseInt(n, 10));
+        const total = (hh * 60 + mm + (minutesToAdd || 0)) % (24 * 60);
+        const outH = Math.floor(total / 60);
+        const outM = total % 60;
+        return `${String(outH).padStart(2, '0')}:${String(outM).padStart(2, '0')}`;
+    }
+
+    formatTimeRange(startTime, endTime) {
+        const toParts = (t) => {
+            const [hh, mm] = (t || '00:00').split(':').map(n => parseInt(n, 10));
+            const ampm = hh >= 12 ? 'pm' : 'am';
+            const h12 = hh % 12 || 12;
+            return { hh, mm, ampm, h12 };
+        };
+
+        const s = toParts(startTime);
+        const e = toParts(endTime);
+
+        const fmtH = (p) => {
+            const min = p.mm === 0 ? '' : `:${String(p.mm).padStart(2, '0')}`;
+            return `${p.h12}${min}`;
+        };
+
+        if (s.ampm === e.ampm) {
+            return `${fmtH(s)}-${fmtH(e)}${e.ampm}`;
+        }
+
+        return `${fmtH(s)}${s.ampm}-${fmtH(e)}${e.ampm}`;
     }
 }
 
