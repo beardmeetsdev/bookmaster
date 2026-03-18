@@ -424,30 +424,32 @@ input:checked + .slider:hover {
 }
 
 .calendar-event {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 10px;
-    background: rgba(231, 76, 60, 0.10);
-    border: 1px solid rgba(231, 76, 60, 0.18);
-    flex-direction: column;
+display: flex;
+align-items: flex-start;
+justify-content: space-between;
+gap: 10px;
+padding: 6px;
+border-radius: 12px;
+border: 2px solid rgba(44, 62, 80, 0.10);
+background: rgba(231, 76, 60, 0.06);
+cursor: pointer;
+transition: all 0.2s ease;
+overflow: hidden;
+flex-direction: column;
 }
 
 .calendar-event--full {
-    background: rgba(39, 174, 96, 0.12);
-    border-color: rgba(39, 174, 96, 0.22);
+background: rgba(39, 174, 96, 0.12);
+border-color: rgba(39, 174, 96, 0.22);
 }
 
 .calendar-event-main {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #2c3e50;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+font-size: 0.8rem;
+font-weight: 700;
+color: #2c3e50;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
 }
 
 .calendar-event-top {
@@ -460,7 +462,7 @@ input:checked + .slider:hover {
 
 .calendar-event-meta {
     width: 100%;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     color: #7f8c8d;
     line-height: 1.2;
 }
@@ -469,7 +471,7 @@ input:checked + .slider:hover {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px;
+    gap: 3px;
 }
 
 .week-view {
@@ -812,7 +814,7 @@ input:checked + .slider:hover {
 
 .player-button {
     display: block;
-    padding: 2px 3px;
+    padding: 2px 4px;
     margin: 0;
     border-radius: 8px;
     font-size: 0.65rem;
@@ -827,9 +829,16 @@ input:checked + .slider:hover {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    aspect-ratio: 1 / 1;
+}
+
+.players-input-grid {
     display: grid;
-    place-items: center;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.players-input-grid input {
+    width: 100%;
 }
 
 .player-button.player-1 {

@@ -26,6 +26,25 @@ class BookingSystem {
         return safe.length > 8 ? safe.slice(0, 8) : safe;
     }
 
+    formatCourtTypeShort(courtType) {
+        const safe = (courtType || '').toString().trim();
+        if (!safe) return '';
+        if (safe.toLowerCase() === 'badminton') return 'Badmin';
+        return safe;
+    }
+
+    formatBookedByCourtMeta(booking) {
+        const bookedByRaw = booking && booking.bookedBy ? booking.bookedBy.toString().trim() : '';
+        const isUnknown = !bookedByRaw || bookedByRaw === '*' || bookedByRaw.toLowerCase() === 'unknown';
+        const namePart = isUnknown ? 'Unknown' : `${bookedByRaw}'s`;
+
+        const courtRaw = booking && booking.court ? booking.court.toString().trim() : '';
+        const courtNumber = courtRaw && courtRaw !== '*' ? courtRaw.replace('Court', '').trim() : '';
+        const courtPart = courtNumber ? courtNumber : '?';
+
+        return `${namePart} court (${courtPart})`;
+    }
+
     init() {
         // Load bookings from Firebase instead of localStorage
         this.loadBookingsFromFirebase();
@@ -438,11 +457,10 @@ class BookingSystem {
                     .forEach(booking => {
                         const startHour = this.formatHour(booking.startTime);
                         const durationMins = this.getBookingDurationMinutes(booking);
-                        const title = `${startHour}${durationMins ? ` (${durationMins}m)` : ''} ${booking.courtType || ''}`.trim();
+                        const courtTypeShort = this.formatCourtTypeShort(booking.courtType);
+                        const title = `${startHour}${durationMins ? ` (${durationMins}m)` : ''} ${courtTypeShort}`.trim();
                         const playersNeeded = this.calculatePlayersNeeded(booking);
-                        const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
-                        const bookedBy = booking.bookedBy ? booking.bookedBy.trim() : '';
-                        const meta = `${bookedBy || 'Unknown'}${courtNumber ? ` (court ${courtNumber})` : ''}`;
+                        const meta = this.formatBookedByCourtMeta(booking);
                         const playersHtml = booking.players && booking.players.length > 0
                             ? booking.players
                                   .map((player, index) => {
@@ -675,15 +693,8 @@ class BookingSystem {
         const title = `${dayName} ${startTimeFormatted} (${durationText})`;
         
         // Time subtitle with conditional court and booked by info
-        let timeSubtitle = booking.courtType;
-        if (booking.court && booking.court !== '' && booking.court !== '*') {
-            // Extract just the number from "Court 1", "Court 2", etc.
-            const courtNumber = booking.court.replace('Court ', '');
-            timeSubtitle += ` Court ${courtNumber}`;
-        }
-        if (booking.bookedBy && booking.bookedBy !== '' && booking.bookedBy !== '*') {
-            timeSubtitle += ` booked by ${booking.bookedBy}`;
-        }
+        let timeSubtitle = this.formatCourtTypeShort(booking.courtType);
+        timeSubtitle += ` ${this.formatBookedByCourtMeta(booking)}`;
         
         // Calculate players still needed
         const calculatePlayersNeeded = (booking) => {
@@ -767,11 +778,29 @@ class BookingSystem {
             document.getElementById('startTime').value = booking.startTime;
             document.getElementById('sessionLength').value = booking.sessionLength || '60';
             document.getElementById('bookedBy').value = booking.bookedBy;
-            document.getElementById('players').value = booking.players ? booking.players.join('\n') : '';
+
+            const players = Array.isArray(booking.players) ? booking.players : [];
+            const p1 = document.getElementById('player1');
+            const p2 = document.getElementById('player2');
+            const p3 = document.getElementById('player3');
+            const p4 = document.getElementById('player4');
+            if (p1) p1.value = (players[0] || '').toString().slice(0, 8);
+            if (p2) p2.value = (players[1] || '').toString().slice(0, 8);
+            if (p3) p3.value = (players[2] || '').toString().slice(0, 8);
+            if (p4) p4.value = (players[3] || '').toString().slice(0, 8);
         } else {
             modalTitle.textContent = 'Create New Booking';
             this.currentEditingId = null;
-            form.reset();
+            if (form) form.reset();
+
+            const p1 = document.getElementById('player1');
+            const p2 = document.getElementById('player2');
+            const p3 = document.getElementById('player3');
+            const p4 = document.getElementById('player4');
+            if (p1) p1.value = '';
+            if (p2) p2.value = '';
+            if (p3) p3.value = '';
+            if (p4) p4.value = '';
             if (deleteRow) deleteRow.style.display = 'none';
             
             // Set default date to today
@@ -798,48 +827,44 @@ class BookingSystem {
         const startTime = document.getElementById('startTime').value;
         const sessionLength = document.getElementById('sessionLength').value;
         const bookedBy = document.getElementById('bookedBy').value || '';
-        const playersText = document.getElementById('players').value;
+
+        const playerInputs = [
+            document.getElementById('player1'),
+            document.getElementById('player2'),
+            document.getElementById('player3'),
+            document.getElementById('player4')
+        ].filter(Boolean);
+
+        const players = playerInputs
+            .map((el) => (el.value || '').toString().trim())
+            .filter((v) => v)
+            .map((v) => v.slice(0, 8));
         
         // Calculate end time
         const endTime = this.calculateEndTime(startTime, sessionLength);
         
-        const players = playersText
-            .split('\n')
-            .map(p => p.trim())
-            .filter(p => p.length > 0);
-        
+        const bookingData = {
+            id: this.currentEditingId || this.generateId(),
+            courtType,
+            maxPlayers,
+            court,
+            date,
+            startTime,
+            sessionLength,
+            endTime,
+            bookedBy,
+            players
+        };
+
         if (this.currentEditingId) {
             // Update existing booking
             const index = this.bookings.findIndex(b => b.id === this.currentEditingId);
             if (index !== -1) {
-                this.bookings[index] = {
-                    id: this.currentEditingId,
-                    courtType,
-                    maxPlayers,
-                    court,
-                    date,
-                    startTime,
-                    sessionLength,
-                    endTime,
-                    bookedBy,
-                    players
-                };
+                this.bookings[index] = bookingData;
             }
         } else {
             // Create new booking
-            const newBooking = {
-                id: this.generateId(),
-                courtType,
-                maxPlayers,
-                court,
-                date,
-                startTime,
-                sessionLength,
-                endTime,
-                bookedBy,
-                players
-            };
-            this.bookings.push(newBooking);
+            this.bookings.push(bookingData);
         }
         
         await this.saveBookingsToFirebase();
