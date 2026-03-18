@@ -189,10 +189,23 @@ input:checked + .slider:hover {
     gap: 1rem;
 }
 
+.controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0.4rem 0 0.6rem 0;
+}
+
 .download-section {
     display: flex;
     justify-content: flex-end;
     margin: 0.5rem 0;
+}
+
+.download-section--bottom {
+    justify-content: flex-end;
+    margin: 10px 0 0 0;
 }
 
 .download-link {
@@ -201,6 +214,10 @@ input:checked + .slider:hover {
     font-size: 18px;
     font-weight: 500;
     transition: color 0.3s ease;
+}
+
+.download-section--bottom .download-link {
+    font-size: 15px;
 }
 
 .download-link:hover {
@@ -483,16 +500,16 @@ input:checked + .slider:hover {
 }
 
 .week-header-dow {
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: #7f8c8d;
-}
-
-.week-header-date {
     font-size: 1.1rem;
     font-weight: 900;
     color: #2c3e50;
-    margin-top: 2px;
+}
+
+.week-header-date {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #27ae60;
+    margin-top: 4px;
 }
 
 .week-grid {
@@ -874,7 +891,7 @@ input:checked + .slider:hover {
     padding: 0;
     border-radius: 12px;
     width: 90%;
-    max-width: 500px;
+    max-width: 860px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -924,8 +941,18 @@ input:checked + .slider:hover {
     padding: 30px;
 }
 
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 0;
+}
+
+.form-group--wide {
+    grid-column: 1 / -1;
 }
 
 .form-group label {
@@ -966,10 +993,19 @@ input:checked + .slider:hover {
     margin-top: 25px;
 }
 
+.form-actions--delete {
+    justify-content: flex-start;
+    margin-top: 12px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
         padding: 8px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
     }
     
     .header-content {

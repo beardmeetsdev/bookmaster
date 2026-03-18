@@ -14,7 +14,7 @@ const db = firebase.firestore();
 class BookingSystem {
     constructor() {
         this.bookings = [];
-        this.showAvailableOnly = false;
+        this.filterMode = 'all';
         this.courtTypeFilter = 'all';
         this.currentCalendarMonth = this.getStartOfWeek(new Date());
         this.init();
@@ -203,7 +203,7 @@ class BookingSystem {
         availabilityRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
                 console.log('Availability filter changed to:', e.target.value);
-                this.showAvailableOnly = e.target.value === 'available';
+                this.filterMode = e.target.value;
                 this.renderBookings();
             });
         });
@@ -245,33 +245,6 @@ class BookingSystem {
             });
         }
 
-        // 3 dots menu functionality
-        document.addEventListener('click', (e) => {
-            // Handle menu dots click
-            if (e.target.classList.contains('menu-dots')) {
-                e.stopPropagation();
-                const bookingId = e.target.dataset.id;
-                const dropdown = document.getElementById(`menu-${bookingId}`);
-                
-                // Close all other dropdowns
-                document.querySelectorAll('.menu-dropdown').forEach(menu => {
-                    if (menu !== dropdown) {
-                        menu.classList.remove('show');
-                    }
-                });
-                
-                // Toggle current dropdown
-                dropdown.classList.toggle('show');
-            }
-            
-            // Close dropdowns when clicking outside
-            if (!e.target.closest('.booking-menu')) {
-                document.querySelectorAll('.menu-dropdown').forEach(menu => {
-                    menu.classList.remove('show');
-                });
-            }
-        });
-
         // Modal controls
         document.querySelector('.close').addEventListener('click', () => {
             this.closeModal();
@@ -286,6 +259,14 @@ class BookingSystem {
             e.preventDefault();
             await this.saveBooking();
         });
+
+        const deleteBtn = document.getElementById('deleteBookingBtn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                if (!this.currentEditingId) return;
+                await this.deleteBooking(this.currentEditingId);
+            });
+        }
 
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
@@ -360,10 +341,15 @@ class BookingSystem {
         let bookingsToRender = this.bookings;
         
         // Filter by availability
-        if (this.showAvailableOnly) {
+        if (this.filterMode === 'available') {
             bookingsToRender = bookingsToRender.filter(booking => {
                 const playersNeeded = this.calculatePlayersNeeded(booking);
                 return playersNeeded > 0;
+            });
+        } else if (this.filterMode === 'booked') {
+            bookingsToRender = bookingsToRender.filter(booking => {
+                const playersNeeded = this.calculatePlayersNeeded(booking);
+                return playersNeeded === 0;
             });
         }
         
@@ -382,21 +368,6 @@ class BookingSystem {
         });
 
         this.renderCalendar(bookingsToRender);
-        
-        // Add event listeners to the new buttons
-        container.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
-                this.editBooking(id);
-            });
-        });
-
-        container.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const id = e.target.dataset.id;
-                await this.deleteBooking(id);
-            });
-        });
     }
 
     renderCalendar(bookingsToRender) {
@@ -428,10 +399,11 @@ class BookingSystem {
             .map((d, i) => {
                 const date = this.addDays(weekStart, i);
                 const isToday = this.toDateKey(date) === new Date().toISOString().split('T')[0];
+                const pretty = this.formatDayDate(date);
                 return `
                     <div class="week-header-cell ${isToday ? 'week-header-cell--today' : ''}">
                         <div class="week-header-dow">${d}</div>
-                        <div class="week-header-date">${date.getDate()}</div>
+                        <div class="week-header-date">${pretty}</div>
                     </div>
                 `;
             })
@@ -464,7 +436,7 @@ class BookingSystem {
                         const playersNeeded = this.calculatePlayersNeeded(booking);
                         const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
                         const bookedBy = booking.bookedBy ? booking.bookedBy.trim() : '';
-                        const meta = `Booked by ${bookedBy || 'Unknown'}${courtNumber ? ` on Court ${courtNumber}` : ''}`;
+                        const meta = `${bookedBy || 'Unknown'}${courtNumber ? ` (court ${courtNumber})` : ''}`;
                         const playersHtml = booking.players && booking.players.length > 0
                             ? booking.players
                                   .map((player, index) => {
@@ -474,16 +446,9 @@ class BookingSystem {
                                   .join('')
                             : '';
                         html += `
-                            <div class="calendar-event ${playersNeeded === 0 ? 'calendar-event--full' : ''}">
+                            <div class="calendar-event ${playersNeeded === 0 ? 'calendar-event--full' : ''}" data-id="${booking.id}" role="button" tabindex="0">
                                 <div class="calendar-event-top">
                                     <div class="calendar-event-main">${title}</div>
-                                    <div class="booking-menu">
-                                        <button class="menu-dots" data-id="${booking.id}">⋮</button>
-                                        <div class="menu-dropdown" id="menu-${booking.id}">
-                                            <button class="menu-item edit-btn" data-id="${booking.id}">✏️ Edit</button>
-                                            <button class="menu-item delete-btn" data-id="${booking.id}">❌ Delete</button>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="calendar-event-meta">${meta}</div>
                                 ${playersHtml ? `<div class="calendar-event-players">${playersHtml}</div>` : ''}
@@ -501,8 +466,8 @@ class BookingSystem {
         if (bookingsToRender.length === 0) {
             html += `
                 <div class="no-bookings">
-                    <h3>${this.showAvailableOnly ? 'No available slots' : 'No bookings found'}</h3>
-                    <p>${this.showAvailableOnly ? 'All bookings are full!' : 'Create your first booking to get started.'}</p>
+                    <h3>${this.filterMode === 'available' ? 'No available slots' : this.filterMode === 'booked' ? 'No booked slots' : 'No bookings found'}</h3>
+                    <p>${this.filterMode === 'available' ? 'All bookings are full!' : 'Create your first booking to get started.'}</p>
                 </div>
             `;
         }
@@ -515,6 +480,21 @@ class BookingSystem {
         if (weekView) {
             this.attachWeekScrollNavigation(weekView);
         }
+
+        container.querySelectorAll('.calendar-event[data-id]').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = card.dataset.id;
+                this.editBooking(id);
+            });
+
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const id = card.dataset.id;
+                    this.editBooking(id);
+                }
+            });
+        });
     }
 
     attachWeekScrollNavigation(weekViewEl) {
@@ -618,6 +598,12 @@ class BookingSystem {
 
     formatShortDate(date) {
         return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    }
+
+    formatDayDate(date) {
+        return date
+            .toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+            .toUpperCase();
     }
 
     formatHour(time) {
@@ -758,10 +744,12 @@ class BookingSystem {
         const modal = document.getElementById('bookingModal');
         const modalTitle = document.getElementById('modalTitle');
         const form = document.getElementById('bookingForm');
+        const deleteRow = document.getElementById('deleteRow');
         
         if (booking) {
             modalTitle.textContent = 'Edit Booking';
             this.currentEditingId = booking.id;
+            if (deleteRow) deleteRow.style.display = 'flex';
             
             // Populate form with booking data
             document.getElementById('courtType').value = booking.courtType;
@@ -776,6 +764,7 @@ class BookingSystem {
             modalTitle.textContent = 'Create New Booking';
             this.currentEditingId = null;
             form.reset();
+            if (deleteRow) deleteRow.style.display = 'none';
             
             // Set default date to today
             document.getElementById('date').value = this.getDateString();
@@ -786,9 +775,11 @@ class BookingSystem {
 
     closeModal() {
         const modal = document.getElementById('bookingModal');
+        const deleteRow = document.getElementById('deleteRow');
         modal.style.display = 'none';
         document.getElementById('bookingForm').reset();
         this.currentEditingId = null;
+        if (deleteRow) deleteRow.style.display = 'none';
     }
 
     async saveBooking() {
@@ -862,6 +853,7 @@ class BookingSystem {
             await this.saveBookingsToFirebase();
             this.sortBookings();
             this.renderBookings();
+            this.closeModal();
         }
     }
 
@@ -909,7 +901,7 @@ class BookingSystem {
     }
 
     getFilterDescription() {
-        const availability = this.showAvailableOnly ? 'AVAILABLE' : 'ALL';
+        const availability = this.filterMode === 'available' ? 'AVAILABLE' : this.filterMode === 'booked' ? 'BOOKED' : 'ALL';
         const courtType = this.courtTypeFilter === 'all' ? 'COURTS' : this.courtTypeFilter.toUpperCase();
         return `${availability} ${courtType}`;
     }
@@ -917,23 +909,19 @@ class BookingSystem {
     async downloadForWhatsApp() {
         console.log('downloadForWhatsApp method started');
         try {
-            // Filter bookings based on both filter states
+            // Filter bookings based on court filter only (download always includes booked + available)
             let bookingsToDownload = this.bookings;
-            
-            // Filter by availability
-            if (this.showAvailableOnly) {
-                bookingsToDownload = bookingsToDownload.filter(booking => {
-                    const playersNeeded = this.calculatePlayersNeeded(booking);
-                    return playersNeeded > 0;
-                });
-            }
-            
+
             // Filter by court type
             if (this.courtTypeFilter !== 'all') {
                 bookingsToDownload = bookingsToDownload.filter(booking => {
                     return booking.courtType.toLowerCase() === this.courtTypeFilter;
                 });
             }
+
+            // Only show bookings from today and beyond
+            const todayKey = new Date().toISOString().split('T')[0];
+            bookingsToDownload = bookingsToDownload.filter(booking => booking.date >= todayKey);
             
             // Sort bookings for display (Unix timestamps for accuracy)
             const sortedBookings = bookingsToDownload.sort((a, b) => {
@@ -943,56 +931,43 @@ class BookingSystem {
             });
 
             if (sortedBookings.length === 0) {
-                const filterDesc = this.getFilterDescription();
-                alert(`No bookings found for: ${filterDesc}!`);
+                alert('No upcoming bookings found!');
                 return;
             }
 
-            let textContent = `🏸 RACQUET COURT BOOKINGS - ${this.getFilterDescription()}\n\n`;
-            
-            // Calculate spaces properly, excluding 'infinite' bookings
-            const validBookings = sortedBookings.filter(booking => booking.maxPlayers !== 'infinite');
-            const totalSpaces = validBookings.reduce((sum, booking) => sum + parseInt(booking.maxPlayers), 0);
-            const totalPlayers = validBookings.reduce((sum, booking) => sum + (booking.players ? booking.players.length : 0), 0);
-            const availableSpaces = totalSpaces - totalPlayers;
-            
-            textContent += `${totalSpaces} TOTAL SPACES\n${availableSpaces} SPACES available\n\n`;
+            const bookedSlots = sortedBookings.filter(b => this.calculatePlayersNeeded(b) === 0);
+            const availableSlots = sortedBookings.filter(b => this.calculatePlayersNeeded(b) > 0);
 
-            for (let i = 0; i < sortedBookings.length; i++) {
-                const booking = sortedBookings[i];
+            const formatLine = (booking) => {
                 const dateObj = new Date(booking.date);
                 const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                 const dayNumber = dateObj.getDate();
                 const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
-                
                 const timeDisplay = `${dayName} ${dayNumber}${this.getOrdinalSuffix(dayNumber)} ${monthName}`;
-                const timeRange = `${this.formatTime(booking.startTime)} - ${this.formatTime(booking.endTime)}`;
-                
-                // Handle court and booked by with "Unknown" placeholders
-                const courtDisplay = booking.court || 'Unknown';
+                const startHour = this.formatHour(booking.startTime);
+                const durationMins = this.getBookingDurationMinutes(booking);
+                const title = `${startHour}${durationMins ? ` (${durationMins}m)` : ''} ${booking.courtType || ''}`.trim();
+                const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
                 const bookedByDisplay = booking.bookedBy || 'Unknown';
-                
-                textContent += `*${timeDisplay} - ${booking.courtType}*\n`;
-                textContent += `⏰ ${timeRange}\n`;
-                textContent += `🏟️ ${courtDisplay} • Booked by ${bookedByDisplay}\n`;
-                
-                // Players display
-                if (booking.players && booking.players.length > 0) {
-                    textContent += `👥 ${booking.players.join(' • ')}\n`;
-                } else {
-                    textContent += `👥 No players\n`;
-                }
-                
-                // Players needed
+                const where = `${bookedByDisplay}${courtNumber ? ` (court ${courtNumber})` : ''}`;
                 const playersNeeded = this.calculatePlayersNeeded(booking);
-                if (playersNeeded > 0) {
-                    textContent += `*${playersNeeded} PLAYERS STILL NEEDED*\n`;
-                }
-                
-                // Add separator between bookings (except last one)
-                if (i < sortedBookings.length - 1) {
-                    textContent += '\n';
-                }
+                const playersLine = booking.players && booking.players.length > 0 ? booking.players.join(' • ') : 'No players';
+                const needLine = playersNeeded > 0 ? ` (${playersNeeded} still needed)` : '';
+
+                return `*${timeDisplay}*\n${title}\n${where}\n👥 ${playersLine}${needLine}`;
+            };
+
+            let textContent = `🏸 RACQUET COURT BOOKINGS\n\n`;
+
+            if (bookedSlots.length > 0) {
+                textContent += `*NEXT GAMES*\n\n`;
+                textContent += bookedSlots.map(formatLine).join('\n\n');
+                textContent += '\n\n';
+            }
+
+            if (availableSlots.length > 0) {
+                textContent += `*STILL TO FILL*\n\n`;
+                textContent += availableSlots.map(formatLine).join('\n\n');
             }
 
             // Create and download the file
@@ -1000,7 +975,7 @@ class BookingSystem {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `racquet-bookings-${this.showAvailableOnly ? 'available' : 'all'}-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = `racquet-bookings-${new Date().toISOString().split('T')[0]}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
