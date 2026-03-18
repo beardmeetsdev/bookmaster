@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Racquet Court Booking System</title>
+    <title>BookMaster</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -13,7 +16,10 @@
     <header>
         <div class="header-content">
             <div class="logo">
-                <h1>Bookings</h1>
+                <h1>BookMaster</h1>
+            </div>
+            <div class="header-actions">
+                <button id="createNew" class="btn btn-primary btn-add-booking" type="button">ADD BOOKING</button>
             </div>
         </div>
     </header>
@@ -31,17 +37,14 @@
                 <label class="radio-option">
                     <input type="radio" name="bookingFilter" value="available">
                     <span class="radio-dot"></span>
-                    <span class="radio-label">Available</span>
+                    <span class="radio-label">Splaces Available</span>
                 </label>
                 <label class="radio-option">
                     <input type="radio" name="bookingFilter" value="booked">
                     <span class="radio-dot"></span>
-                    <span class="radio-label">Booked</span>
+                    <span class="radio-label">Fully Booked</span>
                 </label>
             </div>
-        </div>
-
-        <div class="controls-row">
             <div class="court-filter-container">
                 <select id="courtFilter" class="court-select">
                     <option value="all">All Courts</option>
@@ -50,14 +53,13 @@
                     <option value="badminton">Badminton</option>
                 </select>
             </div>
-            <button id="createNew" class="btn btn-primary btn-add-booking" type="button">ADD BOOKING</button>
         </div>
 
         <main>
             <div class="calendar-controls">
-                <button id="calendarPrev" class="btn btn-secondary" type="button">Prev</button>
+                <button id="calendarPrev" class="btn btn-secondary" type="button">←</button>
                 <div id="calendarMonthLabel" class="calendar-month-label"></div>
-                <button id="calendarNext" class="btn btn-secondary" type="button">Next</button>
+                <button id="calendarNext" class="btn btn-secondary" type="button">→</button>
             </div>
             <div id="bookingsList" class="bookings-container">
                 <!-- Bookings will be dynamically inserted here -->
