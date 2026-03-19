@@ -968,12 +968,12 @@ class BookingSystem {
         const modal = document.getElementById('bookingModal');
         const modalTitle = document.getElementById('modalTitle');
         const form = document.getElementById('bookingForm');
-        const deleteRow = document.getElementById('deleteRow');
+        const deleteBtn = document.getElementById('deleteBookingBtn');
         
         if (booking) {
             modalTitle.textContent = 'Edit Booking';
             this.currentEditingId = booking.id;
-            if (deleteRow) deleteRow.style.display = 'flex';
+            if (deleteBtn) deleteBtn.style.display = 'inline-block';
             
             // Populate form with booking data
             document.getElementById('courtType').value = booking.courtType;
@@ -1006,7 +1006,7 @@ class BookingSystem {
             if (p2) p2.value = '';
             if (p3) p3.value = '';
             if (p4) p4.value = '';
-            if (deleteRow) deleteRow.style.display = 'none';
+            if (deleteBtn) deleteBtn.style.display = 'none';
             
             // Set default date to today
             document.getElementById('date').value = this.getDateString();
@@ -1017,11 +1017,11 @@ class BookingSystem {
 
     closeModal() {
         const modal = document.getElementById('bookingModal');
-        const deleteRow = document.getElementById('deleteRow');
+        const deleteBtn = document.getElementById('deleteBookingBtn');
         modal.style.display = 'none';
         document.getElementById('bookingForm').reset();
         this.currentEditingId = null;
-        if (deleteRow) deleteRow.style.display = 'none';
+        if (deleteBtn) deleteBtn.style.display = 'none';
     }
 
     async saveBooking() {
@@ -1316,7 +1316,7 @@ class BookingSystem {
 
             // Open WhatsApp with the message
             const message = encodeURIComponent(textContent);
-            const phoneNumber = '447123456789'; // TODO: Replace with actual WhatsApp number
+            const phoneNumber = '448962433229';
             const url = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
             window.open(url, '_blank');
             
