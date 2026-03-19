@@ -585,6 +585,22 @@ class BookingSystem {
 
         html += '</div>';
         container.innerHTML = html;
+
+        // Attach click event listeners to calendar events
+        container.querySelectorAll('.calendar-event[data-id]').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = card.dataset.id;
+                this.editBooking(id);
+            });
+
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const id = card.dataset.id;
+                    this.editBooking(id);
+                }
+            });
+        });
     }
 
     renderCalendar(bookingsToRender) {
@@ -1257,7 +1273,7 @@ class BookingSystem {
                 const dateObj = new Date(booking.date);
                 const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                 const dayNumber = dateObj.getDate();
-                const timeDisplay = `${dayName} ${dayNumber}${this.getOrdinalSuffix(dayNumber)}`;
+                const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
 
                 const durationMins = this.getBookingDurationMinutes(booking);
                 const startTime = booking.startTime;
@@ -1265,7 +1281,6 @@ class BookingSystem {
                 const timeRange = this.formatTimeRange(startTime, endTime);
 
                 const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
-                const courtText = courtNumber ? ` on court ${courtNumber}` : '';
 
                 const bookedByRaw = (booking.bookedBy || 'Unknown').toString().trim();
                 const playersArr = Array.isArray(booking.players) ? booking.players.filter(Boolean) : [];
@@ -1279,10 +1294,11 @@ class BookingSystem {
                 const bookedByPrefix = bookedByIsKnown && !bookedByInPlayers ? '↔ ' : '';
                 const bookedByDisplay = `${bookedByPrefix}${bookedByRaw}`;
 
-                const line1 = `${timeDisplay} ${timeRange}${courtText} (${bookedByDisplay} Booking)`;
-                const line2 = playersArr.length > 0 ? playersArr.join(' • ') : 'No players';
+                const line1 = `${dayName} ${dayNumber}${this.getOrdinalSuffix(dayNumber)} ${monthName} ${timeRange}`;
+                const line2 = courtNumber ? `${bookedByDisplay} (court ${courtNumber})` : bookedByDisplay;
+                const line3 = playersArr.length > 0 ? playersArr.join(' • ') : 'No players';
 
-                return `${line1}\n${line2}`;
+                return `${line1}\n${line2}\n${line3}`;
             };
 
             let textContent = '';
@@ -1300,7 +1316,8 @@ class BookingSystem {
 
             // Open WhatsApp with the message
             const message = encodeURIComponent(textContent);
-            const url = `https://api.whatsapp.com/send?text=${message}`;
+            const phoneNumber = '447123456789'; // TODO: Replace with actual WhatsApp number
+            const url = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
             window.open(url, '_blank');
             
         } catch (error) {
