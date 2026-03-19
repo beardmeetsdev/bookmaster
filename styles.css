@@ -1387,7 +1387,9 @@ button:disabled {
         font-weight: 900;
         line-height: 1;
     }
+}
 
+@media (max-width: 480px) {
     .btn-whatsapp {
         display: inline-flex;
     }

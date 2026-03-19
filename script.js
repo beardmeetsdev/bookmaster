@@ -1316,7 +1316,7 @@ class BookingSystem {
 
             // Open WhatsApp with the message
             const message = encodeURIComponent(textContent);
-            const phoneNumber = '448962433229';
+            const phoneNumber = '447962433229';
             const url = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
             window.open(url, '_blank');
             
