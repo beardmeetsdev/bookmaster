@@ -277,8 +277,8 @@ input:checked + .slider:hover {
 }
 
 .whatsapp-icon {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     display: block;
 }
 
@@ -344,14 +344,14 @@ input:checked + .slider:hover {
 }
 
 .btn-primary {
-    background-color: #27ae60;
+    background-color: #f87328;
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #229954;
+    background-color: #e66320;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+    box-shadow: 0 4px 12px rgba(248, 115, 40, 0.3);
 }
 
 .btn-secondary {
