@@ -16,7 +16,8 @@ class BookingSystem {
         this.bookings = [];
         this.filterMode = 'all';
         this.courtTypeFilter = 'all';
-        this.currentCalendarMonth = this.getStartOfWeek(new Date());
+        this.currentCalendarMonth = new Date();
+        this.currentCalendarMonth.setHours(0, 0, 0, 0);
         this.init();
     }
 
@@ -338,8 +339,15 @@ class BookingSystem {
             const prevBtn = document.getElementById('calendarPrev');
             if (prevBtn) {
                 prevBtn.addEventListener('click', () => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
                     const candidate = this.addDays(this.currentCalendarMonth, -7);
-                    this.currentCalendarMonth = this.clampToMinWeek(candidate);
+                    // Don't go before today
+                    if (candidate.getTime() >= today.getTime()) {
+                        this.currentCalendarMonth = candidate;
+                    } else {
+                        this.currentCalendarMonth = new Date(today);
+                    }
                     this.renderBookings();
                 });
             }
@@ -347,6 +355,7 @@ class BookingSystem {
             const nextBtn = document.getElementById('calendarNext');
             if (nextBtn) {
                 nextBtn.addEventListener('click', () => {
+                    // Next button advances the view by 7 days
                     this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, 7);
                     this.renderBookings();
                 });
@@ -608,15 +617,21 @@ class BookingSystem {
         const monthLabel = document.getElementById('calendarMonthLabel');
         const prevBtn = document.getElementById('calendarPrev');
 
-        const minWeekStart = this.getMinWeekStart();
-        const weekStart = this.clampToMinWeek(this.currentCalendarMonth);
-        if (weekStart.getTime() !== this.getStartOfWeek(this.currentCalendarMonth).getTime()) {
-            this.currentCalendarMonth = weekStart;
+        // Ensure we never show days before today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // If currentCalendarMonth is before today, reset to today
+        if (this.currentCalendarMonth.getTime() < today.getTime()) {
+            this.currentCalendarMonth = new Date(today);
         }
+        
+        const weekStart = new Date(this.currentCalendarMonth);
         const weekEnd = this.addDays(weekStart, 6);
 
+        // Disable prev button if we're at today
         if (prevBtn) {
-            prevBtn.disabled = weekStart.getTime() <= minWeekStart.getTime();
+            prevBtn.disabled = weekStart.getTime() <= today.getTime();
         }
 
         if (monthLabel) {
@@ -633,23 +648,23 @@ class BookingSystem {
         });
 
 
-        const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
         let html = '<div class="week-view" id="weekView">';
         html += '<div class="week-header">';
-        html += weekdayLabels
-            .map((d, i) => {
-                const date = this.addDays(weekStart, i);
-                const isToday = this.toDateKey(date) === new Date().toISOString().split('T')[0];
-                const pretty = this.formatDayDate(date);
-                return `
-                    <div class="week-header-cell ${isToday ? 'week-header-cell--today' : ''}">
-                        <div class="week-header-dow">${d}</div>
-                        <div class="week-header-date">${pretty}</div>
-                    </div>
-                `;
-            })
-            .join('');
+        for (let i = 0; i < 7; i++) {
+            const date = this.addDays(weekStart, i);
+            const dayOfWeek = date.getDay();
+            const dayLabel = weekdayLabels[dayOfWeek];
+            const isToday = this.toDateKey(date) === new Date().toISOString().split('T')[0];
+            const pretty = this.formatDayDate(date);
+            html += `
+                <div class="week-header-cell ${isToday ? 'week-header-cell--today' : ''}">
+                    <div class="week-header-dow">${dayLabel}</div>
+                    <div class="week-header-date">${pretty}</div>
+                </div>
+            `;
+        }
         html += '</div>';
 
         html += '<div class="week-grid">';
