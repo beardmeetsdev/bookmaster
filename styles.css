@@ -276,6 +276,12 @@ input:checked + .slider:hover {
     display: block;
 }
 
+.whatsapp-icon {
+    width: 28px;
+    height: 28px;
+    display: block;
+}
+
 .logo h1 {
     font-size: 2rem;
     margin: 0;
