@@ -245,6 +245,35 @@ input:checked + .slider:hover {
 .header-actions {
     display: flex;
     align-items: center;
+    gap: 10px;
+}
+
+.btn-whatsapp {
+    display: none;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    max-width: 46px;
+    padding: 0;
+    border-radius: 999px;
+    background: #25D366;
+    color: white;
+    border: none;
+    cursor: pointer;
+    flex: 0 0 46px;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-whatsapp:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+}
+
+.btn-whatsapp svg {
+    display: block;
 }
 
 .logo h1 {
@@ -1355,6 +1384,10 @@ button:disabled {
         font-size: 28px;
         font-weight: 900;
         line-height: 1;
+    }
+
+    .btn-whatsapp {
+        display: inline-flex;
     }
 
     .availability-filter-container {

@@ -326,6 +326,14 @@ class BookingSystem {
             this.downloadForWhatsApp();
         });
 
+        // WhatsApp share button (mobile)
+        const whatsappBtn = document.getElementById('whatsappBtn');
+        if (whatsappBtn) {
+            whatsappBtn.addEventListener('click', () => {
+                this.shareOnWhatsApp();
+            });
+        }
+
         if (!this.isMobileUi()) {
             const prevBtn = document.getElementById('calendarPrev');
             if (prevBtn) {
@@ -1207,6 +1215,93 @@ class BookingSystem {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            
+        } catch (error) {
+            console.error('Error generating WhatsApp text:', error);
+            alert('Failed to generate text file. Please try again.');
+        }
+    }
+
+    async shareOnWhatsApp() {
+        try {
+            // Filter bookings based on court filter only (download always includes booked + available)
+            let bookingsToDownload = this.bookings;
+
+            // Filter by court type
+            if (this.courtTypeFilter !== 'all') {
+                bookingsToDownload = bookingsToDownload.filter(booking => {
+                    return booking.courtType.toLowerCase() === this.courtTypeFilter;
+                });
+            }
+
+            // Only show bookings from today and beyond
+            const todayKey = new Date().toISOString().split('T')[0];
+            bookingsToDownload = bookingsToDownload.filter(booking => booking.date >= todayKey);
+            
+            // Sort bookings for display (Unix timestamps for accuracy)
+            const sortedBookings = bookingsToDownload.sort((a, b) => {
+                const timestampA = new Date(a.date + ' ' + a.startTime).getTime();
+                const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
+                return timestampA - timestampB;
+            });
+
+            if (sortedBookings.length === 0) {
+                alert('No upcoming bookings found!');
+                return;
+            }
+
+            const bookedSlots = sortedBookings.filter(b => this.calculatePlayersNeeded(b) === 0);
+            const availableSlots = sortedBookings.filter(b => this.calculatePlayersNeeded(b) > 0);
+
+            const formatLine = (booking) => {
+                const dateObj = new Date(booking.date);
+                const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                const dayNumber = dateObj.getDate();
+                const timeDisplay = `${dayName} ${dayNumber}${this.getOrdinalSuffix(dayNumber)}`;
+
+                const durationMins = this.getBookingDurationMinutes(booking);
+                const startTime = booking.startTime;
+                const endTime = this.addMinutesToTime(startTime, durationMins || 60);
+                const timeRange = this.formatTimeRange(startTime, endTime);
+
+                const courtNumber = booking.court ? booking.court.replace('Court ', '').trim() : '';
+                const courtText = courtNumber ? ` on court ${courtNumber}` : '';
+
+                const bookedByRaw = (booking.bookedBy || 'Unknown').toString().trim();
+                const playersArr = Array.isArray(booking.players) ? booking.players.filter(Boolean) : [];
+
+                const normalize = (s) => (s || '').toString().trim().toLowerCase();
+                const bookedByNorm = normalize(bookedByRaw);
+                const playerNorms = playersArr.map(p => normalize(p));
+
+                const bookedByIsKnown = bookedByNorm && bookedByNorm !== 'unknown' && bookedByNorm !== '?';
+                const bookedByInPlayers = bookedByIsKnown && playerNorms.includes(bookedByNorm);
+                const bookedByPrefix = bookedByIsKnown && !bookedByInPlayers ? '↔ ' : '';
+                const bookedByDisplay = `${bookedByPrefix}${bookedByRaw}`;
+
+                const line1 = `${timeDisplay} ${timeRange}${courtText} (${bookedByDisplay} Booking)`;
+                const line2 = playersArr.length > 0 ? playersArr.join(' • ') : 'No players';
+
+                return `${line1}\n${line2}`;
+            };
+
+            let textContent = '';
+
+            if (bookedSlots.length > 0) {
+                textContent += `*NEXT GAMES*\n\n`;
+                textContent += bookedSlots.map(formatLine).join('\n\n');
+                textContent += '\n\n';
+            }
+
+            if (availableSlots.length > 0) {
+                textContent += `*STILL TO FILL*\n\n`;
+                textContent += availableSlots.map(formatLine).join('\n\n');
+            }
+
+            // Open WhatsApp with the message
+            const message = encodeURIComponent(textContent);
+            const url = `https://api.whatsapp.com/send?text=${message}`;
+            window.open(url, '_blank');
             
         } catch (error) {
             console.error('Error generating WhatsApp text:', error);
