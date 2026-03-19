@@ -575,6 +575,8 @@ button:disabled {
         height: 46px;
         border-radius: 999px;
         padding: 0;
+        min-width: 46px;
+        max-width: 46px;
         font-size: 28px;
         font-weight: 900;
         line-height: 1;
@@ -605,14 +607,26 @@ button:disabled {
         white-space: nowrap;
     }
 
-    .availability-select {
-        width: 100%;
-        padding: 10px 12px;
+    .availability-select,
+    .court-select {
+        width: auto;
+        max-width: 170px;
+        padding: 8px 10px;
         border-radius: 4px;
         border: 1px solid rgba(0, 0, 0, 0.12);
         background: #ffffff;
         font-weight: 800;
+        font-size: 0.95rem;
         color: #2c3e50;
+        height: 40px;
+        line-height: 40px;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .availability-select {
+        flex: 1;
+        max-width: none;
     }
 
     .week-view {

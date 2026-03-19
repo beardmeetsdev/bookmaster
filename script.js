@@ -498,7 +498,7 @@ class BookingSystem {
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const daysToShow = 21;
+        const daysToShow = 90;
         const endDate = this.addDays(today, daysToShow - 1);
 
         if (monthLabel) {
