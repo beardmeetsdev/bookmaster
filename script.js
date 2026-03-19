@@ -20,6 +20,23 @@ class BookingSystem {
         this.init();
     }
 
+    isMobileUi() {
+        return window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+    }
+
+    applyMobileUi() {
+        const createBtn = document.getElementById('createNew');
+        if (createBtn) {
+            if (this.isMobileUi()) {
+                createBtn.textContent = '+';
+                createBtn.setAttribute('aria-label', 'Add booking');
+            } else {
+                createBtn.textContent = 'ADD BOOKING';
+                createBtn.removeAttribute('aria-label');
+            }
+        }
+    }
+
     formatPlayerNameForChip(name) {
         const safe = (name || '').toString().trim();
         if (!safe) return '';
@@ -80,6 +97,15 @@ class BookingSystem {
         this.setupEventListeners();
         this.populateTimeDropdowns();
         this.cleanupPastBookings();
+        this.applyMobileUi();
+
+        const availabilitySelect = document.getElementById('availabilityFilter');
+        if (availabilitySelect) availabilitySelect.value = this.filterMode;
+
+        window.addEventListener('resize', () => {
+            this.applyMobileUi();
+            this.renderBookings();
+        });
         this.renderBookings();
     }
 
@@ -257,9 +283,27 @@ class BookingSystem {
             radio.addEventListener('change', (e) => {
                 console.log('Availability filter changed to:', e.target.value);
                 this.filterMode = e.target.value;
+
+                const availabilitySelect = document.getElementById('availabilityFilter');
+                if (availabilitySelect && availabilitySelect.value !== this.filterMode) {
+                    availabilitySelect.value = this.filterMode;
+                }
                 this.renderBookings();
             });
         });
+
+        const availabilitySelect = document.getElementById('availabilityFilter');
+        if (availabilitySelect) {
+            availabilitySelect.addEventListener('change', (e) => {
+                this.filterMode = e.target.value;
+
+                availabilityRadios.forEach((radio) => {
+                    radio.checked = radio.value === this.filterMode;
+                });
+
+                this.renderBookings();
+            });
+        }
         
         // Court type filter dropdown (both desktop and mobile)
         const courtDropdown = document.getElementById('courtFilter');
@@ -282,21 +326,23 @@ class BookingSystem {
             this.downloadForWhatsApp();
         });
 
-        const prevBtn = document.getElementById('calendarPrev');
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                const candidate = this.addDays(this.currentCalendarMonth, -7);
-                this.currentCalendarMonth = this.clampToMinWeek(candidate);
-                this.renderBookings();
-            });
-        }
+        if (!this.isMobileUi()) {
+            const prevBtn = document.getElementById('calendarPrev');
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    const candidate = this.addDays(this.currentCalendarMonth, -7);
+                    this.currentCalendarMonth = this.clampToMinWeek(candidate);
+                    this.renderBookings();
+                });
+            }
 
-        const nextBtn = document.getElementById('calendarNext');
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, 7);
-                this.renderBookings();
-            });
+            const nextBtn = document.getElementById('calendarNext');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    this.currentCalendarMonth = this.addDays(this.currentCalendarMonth, 7);
+                    this.renderBookings();
+                });
+            }
         }
 
         const bookingsList = document.getElementById('bookingsList');
@@ -439,7 +485,98 @@ class BookingSystem {
             return timestampA - timestampB;
         });
 
-        this.renderCalendar(bookingsToRender);
+        if (this.isMobileUi()) {
+            this.renderMobileCalendar(bookingsToRender);
+        } else {
+            this.renderCalendar(bookingsToRender);
+        }
+    }
+
+    renderMobileCalendar(bookingsToRender) {
+        const container = document.getElementById('bookingsList');
+        const monthLabel = document.getElementById('calendarMonthLabel');
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const daysToShow = 21;
+        const endDate = this.addDays(today, daysToShow - 1);
+
+        if (monthLabel) {
+            const startStr = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            const endStr = endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            monthLabel.textContent = `${startStr} - ${endStr}`;
+        }
+
+        const bookingsByDate = new Map();
+        (bookingsToRender || []).forEach(b => {
+            if (!b || !b.date) return;
+            if (!bookingsByDate.has(b.date)) bookingsByDate.set(b.date, []);
+            bookingsByDate.get(b.date).push(b);
+        });
+
+        const weekdayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        let html = '<div class="week-view">';
+
+        html += '<div class="week-header">';
+        for (let i = 0; i < daysToShow; i++) {
+            const date = this.addDays(today, i);
+            const isToday = this.toDateKey(date) === new Date().toISOString().split('T')[0];
+            const dow = weekdayLabels[(date.getDay() + 6) % 7];
+            const pretty = this.formatDayDate(date);
+            html += `
+                <div class="week-header-cell ${isToday ? 'week-header-cell--today' : ''}">
+                    <div class="week-header-dow">${dow}</div>
+                    <div class="week-header-date">${pretty}</div>
+                </div>
+            `;
+        }
+        html += '</div>';
+
+        html += '<div class="week-grid">';
+        for (let i = 0; i < daysToShow; i++) {
+            const cellDate = this.addDays(today, i);
+            const dateKey = this.toDateKey(cellDate);
+            const events = bookingsByDate.has(dateKey) ? bookingsByDate.get(dateKey) : [];
+            const isToday = dateKey === new Date().toISOString().split('T')[0];
+
+            html += `<div class="week-day ${isToday ? 'week-day--today' : ''}" data-date="${dateKey}">`;
+            html += '<div class="calendar-events">';
+
+            if (events.length > 0) {
+                events
+                    .slice()
+                    .sort((a, b) => {
+                        const timestampA = new Date(a.date + ' ' + a.startTime).getTime();
+                        const timestampB = new Date(b.date + ' ' + b.startTime).getTime();
+                        return timestampA - timestampB;
+                    })
+                    .forEach(booking => {
+                        const startHour = this.formatHour(booking.startTime);
+                        const durationMins = this.getBookingDurationMinutes(booking);
+                        const courtTypeShort = this.formatCourtTypeShort(booking.courtType);
+                        const title = `${startHour}${durationMins ? ` (${durationMins}m)` : ''} ${courtTypeShort}`.trim();
+                        const playersNeeded = this.calculatePlayersNeeded(booking);
+                        const meta = this.formatBookedByCourtMeta(booking);
+                        const playersHtml = this.renderPlayerSlots(booking.players, 4);
+                        html += `
+                            <div class="calendar-event ${playersNeeded === 0 ? 'calendar-event--full' : ''}" data-id="${booking.id}" role="button" tabindex="0">
+                                <div class="calendar-event-top">
+                                    <div class="calendar-event-main">${title}</div>
+                                </div>
+                                <div class="calendar-event-meta">${meta}</div>
+                                <div class="calendar-event-players">${playersHtml}</div>
+                            </div>
+                        `;
+                    });
+            }
+
+            html += '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        html += '</div>';
+        container.innerHTML = html;
     }
 
     renderCalendar(bookingsToRender) {

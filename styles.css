@@ -357,7 +357,7 @@ button:disabled {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin: 12px 0 16px 0;
+    margin: 18px 0 14px;
 }
 
 .calendar-month-label {
@@ -365,6 +365,12 @@ button:disabled {
     text-align: center;
     font-weight: 700;
     color: #2c3e50;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.availability-filter-container {
+    display: none;
 }
 
 .bookings-container {
@@ -564,6 +570,51 @@ button:disabled {
 }
 
 @media (max-width: 600px) {
+    .btn-add-booking {
+        width: 46px;
+        height: 46px;
+        border-radius: 999px;
+        padding: 0;
+        font-size: 28px;
+        font-weight: 900;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .calendar-controls {
+        display: none;
+    }
+
+    .radio-toggle-container {
+        display: none;
+    }
+
+    .availability-filter-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .availability-label {
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        white-space: nowrap;
+    }
+
+    .availability-select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: #ffffff;
+        font-weight: 800;
+        color: #2c3e50;
+    }
+
     .week-view {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -571,12 +622,16 @@ button:disabled {
 
     .week-header {
         gap: 6px;
-        width: calc(100% * 7 / 3);
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: calc((100% - 12px) / 3);
     }
 
     .week-grid {
         gap: 6px;
-        width: calc(100% * 7 / 3);
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: calc((100% - 12px) / 3);
     }
 
     .week-header-date {
